@@ -18,6 +18,7 @@ export default function Editor() {
 
   const [error, setError] = useState('');
   const [showRenderModal, setShowRenderModal] = useState(false);
+  const [mobileEditorTab, setMobileEditorTab] = useState('canvas');
 
   useEffect(() => {
     if (!id) {
@@ -83,10 +84,40 @@ export default function Editor() {
         </p>
       )}
 
+      <div className="editor-mobile-tabs">
+        <button
+          type="button"
+          className={mobileEditorTab === 'layers' ? 'button primary' : 'button'}
+          onClick={() => setMobileEditorTab('layers')}
+        >
+          Layers
+        </button>
+        <button
+          type="button"
+          className={mobileEditorTab === 'canvas' ? 'button primary' : 'button'}
+          onClick={() => setMobileEditorTab('canvas')}
+        >
+          Canvas
+        </button>
+        <button
+          type="button"
+          className={mobileEditorTab === 'props' ? 'button primary' : 'button'}
+          onClick={() => setMobileEditorTab('props')}
+        >
+          Ozellikler
+        </button>
+      </div>
+
       <div className="editor-layout">
-        <LayerPanel />
-        <Canvas />
-        <PropertiesPanel />
+        <div className={mobileEditorTab === 'layers' ? 'editor-col active' : 'editor-col'}>
+          <LayerPanel />
+        </div>
+        <div className={mobileEditorTab === 'canvas' ? 'editor-col active' : 'editor-col'}>
+          <Canvas />
+        </div>
+        <div className={mobileEditorTab === 'props' ? 'editor-col active' : 'editor-col'}>
+          <PropertiesPanel />
+        </div>
       </div>
 
       {showRenderModal && <RenderModal onClose={() => setShowRenderModal(false)} />}

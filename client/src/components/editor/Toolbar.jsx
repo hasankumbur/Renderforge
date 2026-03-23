@@ -25,6 +25,7 @@ export default function Toolbar({ onOpenRender }) {
   const [error, setError] = useState('');
   const [customWidth, setCustomWidth] = useState(template.width);
   const [customHeight, setCustomHeight] = useState(template.height);
+  const [compactOpen, setCompactOpen] = useState(false);
 
   useEffect(() => {
     setCustomWidth(template.width);
@@ -88,7 +89,13 @@ export default function Toolbar({ onOpenRender }) {
 
   return (
     <div>
-      <div className="toolbar">
+      <div className="toolbar-mobile-head">
+        <button className="button" type="button" onClick={() => setCompactOpen((prev) => !prev)}>
+          {compactOpen ? 'Araçları Gizle' : 'Araçları Aç'}
+        </button>
+      </div>
+
+      <div className={compactOpen ? 'toolbar toolbar-open' : 'toolbar'}>
         <input
           ref={uploadInputRef}
           type="file"

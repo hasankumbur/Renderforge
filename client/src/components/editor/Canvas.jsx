@@ -126,6 +126,7 @@ function objectToLayerPatch(object, layerType) {
 export default function Canvas() {
   const canvasElementRef = useRef(null);
   const canvasRef = useRef(null);
+  const stageRef = useRef(null);
   const applyingRef = useRef(false);
 
   const template = useEditorStore((state) => state.template);
@@ -262,8 +263,28 @@ export default function Canvas() {
     }
   }, [selectedLayerId]);
 
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const stage = stageRef.current;
+    if (!canvas || !stage) {
+      return;
+    }
+
+    const stageWidth = stage.clientWidth;
+    if (!stageWidth) {
+      return;
+    }
+
+    const targetWidth = Number(template.width || 1080);
+    const fitZoom = Math.min(1, (stageWidth - 40) / targetWidth);
+
+    canvas.setZoom(Math.max(0.3, fitZoom));
+    canvas.absolutePan({ x: 0, y: 0 });
+    canvas.renderAll();
+  }, [template.width, template.height]);
+
   return (
-    <div className="panel canvas-stage">
+    <div ref={stageRef} className="panel canvas-stage">
       <div className="canvas-scroll">
         <div
           className="canvas-board"

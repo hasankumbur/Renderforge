@@ -20,7 +20,7 @@ export default function Renders() {
       {loading && <p>Yukleniyor...</p>}
       {error && <p style={{ color: '#fca5a5' }}>{error}</p>}
 
-      <div className="panel">
+      <div className="panel renders-desktop-wrap">
         <div className="table-wrap">
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
@@ -55,6 +55,28 @@ export default function Renders() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div className="renders-mobile-cards">
+        {rows.map((row) => (
+          <article key={row.id} className="panel render-card">
+            <div className="render-card-row"><strong>Render ID</strong><span>{row.id}</span></div>
+            <div className="render-card-row"><strong>Template</strong><span>{row.template_id}</span></div>
+            <div className="render-card-row"><strong>Tip</strong><span>{row.output_type}</span></div>
+            <div className="render-card-row"><strong>Durum</strong><span>{row.status}</span></div>
+            <div className="render-card-row"><strong>Tarih</strong><span>{row.created_at}</span></div>
+            <div className="render-card-row">
+              <strong>Cikti</strong>
+              {row.output_url ? (
+                <a href={row.output_url} target="_blank" rel="noreferrer">
+                  Indir
+                </a>
+              ) : (
+                <span>-</span>
+              )}
+            </div>
+          </article>
+        ))}
       </div>
     </section>
   );
