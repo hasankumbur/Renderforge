@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api } from '../../lib/api.js';
 import { useEditorStore } from '../../store/editorStore.js';
 
@@ -14,9 +14,22 @@ export default function Toolbar({ onOpenRender }) {
   const setTemplateMeta = useEditorStore((state) => state.setTemplateMeta);
   const addLayer = useEditorStore((state) => state.addLayer);
   const setTemplate = useEditorStore((state) => state.setTemplate);
+  const undo = useEditorStore((state) => state.undo);
+  const redo = useEditorStore((state) => state.redo);
+  const historyCount = useEditorStore((state) => state.history.length);
+  const futureCount = useEditorStore((state) => state.future.length);
 
+  const uploadInputRef = useRef(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const [customWidth, setCustomWidth] = useState(template.width);
+  const [customHeight, setCustomHeight] = useState(template.height);
+
+  useEffect(() => {
+    setCustomWidth(template.width);
+    setCustomHeight(template.height);
+  }, [template.height, template.width]);
 
   async function saveTemplate() {
     setSaving(true);
@@ -47,9 +60,52 @@ export default function Toolbar({ onOpenRender }) {
     }
   }
 
+  async function handleAssetUpload(event) {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    setUploading(true);
+    setError('');
+    try {
+      const payload = await api.uploadAsset(file);
+      addLayer('image', {
+        src: payload.data.url,
+        width: 420,
+        height: 240,
+      });
+    } catch (apiError) {
+      setError(apiError.message);
+    } finally {
+      setUploading(false);
+      event.target.value = '';
+    }
+  }
+
+  const sizeValue = `${template.width}x${template.height}`;
+  const matchedSize = canvasSizes.find((item) => item.label === sizeValue);
+
   return (
     <div>
       <div className="toolbar">
+        <input
+          ref={uploadInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={handleAssetUpload}
+        />
+
+        <input
+          className="button toolbar-template-name"
+          value={template.name}
+          onChange={(event) =>
+            setTemplateMeta({ name: event.target.value }, { recordHistory: false })
+          }
+          placeholder="Template adi"
+        />
+
         <button className="button" type="button" onClick={() => addLayer('text')}>
           Text Ekle
         </button>
@@ -59,19 +115,29 @@ export default function Toolbar({ onOpenRender }) {
         <button className="button" type="button" onClick={() => addLayer('circle')}>
           Daire Ekle
         </button>
-        <button className="button" type="button" onClick={() => addLayer('image')}>
-          Gorsel Ekle
+        <button
+          className="button"
+          type="button"
+          onClick={() => uploadInputRef.current?.click()}
+          disabled={uploading}
+        >
+          {uploading ? 'Upload...' : 'Gorsel Yukle'}
         </button>
 
         <select
           className="button"
-          value={`${template.width}x${template.height}`}
+          value={matchedSize ? sizeValue : 'custom'}
           onChange={(event) => {
+            if (event.target.value === 'custom') {
+              return;
+            }
             const selected = canvasSizes.find(
               (item) => item.label === event.target.value
             );
             if (selected) {
               setTemplateMeta({ width: selected.width, height: selected.height });
+              setCustomWidth(selected.width);
+              setCustomHeight(selected.height);
             }
           }}
         >
@@ -80,12 +146,58 @@ export default function Toolbar({ onOpenRender }) {
               {size.label}
             </option>
           ))}
+          <option value="custom">Custom</option>
         </select>
+
+        <input
+          className="button toolbar-size-input"
+          type="number"
+          min={100}
+          value={customWidth}
+          onChange={(event) => setCustomWidth(Number(event.target.value))}
+        />
+        <input
+          className="button toolbar-size-input"
+          type="number"
+          min={100}
+          value={customHeight}
+          onChange={(event) => setCustomHeight(Number(event.target.value))}
+        />
+        <button
+          className="button"
+          type="button"
+          onClick={() =>
+            setTemplateMeta({
+              width: Math.max(100, Number(customWidth || 1080)),
+              height: Math.max(100, Number(customHeight || 1080)),
+            })
+          }
+        >
+          Boyutu Uygula
+        </button>
+
+        <label className="button toolbar-color-input">
+          Arkaplan
+          <input
+            type="color"
+            value={template.background || '#ffffff'}
+            onChange={(event) =>
+              setTemplateMeta({ background: event.target.value })
+            }
+          />
+        </label>
+
+        <button className="button" type="button" onClick={undo} disabled={!historyCount}>
+          Undo
+        </button>
+        <button className="button" type="button" onClick={redo} disabled={!futureCount}>
+          Redo
+        </button>
 
         <button className="button primary" type="button" onClick={saveTemplate} disabled={saving}>
           {saving ? 'Kaydediliyor...' : 'Kaydet'}
         </button>
-        <button className="button" type="button" onClick={onOpenRender}>
+        <button className="button" type="button" onClick={onOpenRender} disabled={!template.id}>
           Render Al
         </button>
       </div>

@@ -8,3 +8,6 @@ server/renderforge.db
 server/renderforge.db-shm
 server/renderforge.db-wal
 .env
+.env.local
+.DS_Store
+*.log

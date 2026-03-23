@@ -82,5 +82,7 @@ Asagidaki endpointler `X-API-Key` ister:
 ## Baslangic durumu
 Bu iterasyonda:
 - Backend CRUD ve image render akisi hazirlandi.
-- Frontend editor panel iskeleti kuruldu.
-- Video render ve Fabric.js tabanli gelismis canvas asamalari bir sonraki iterasyona birakildi.
+- Frontend editor paneli Fabric.js canvas ile aktif hale getirildi.
+- Layer drag-drop z-order, undo/redo ve gorsel upload akisi eklendi.
+- Properties paneli text/image/shape alanlariyla gelistirildi.
+- Video render (Remotion) hala sonraki fazda.

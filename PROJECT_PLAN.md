@@ -10,12 +10,12 @@ Render endpoint'i n8n'den cagrilabilir, SQLite tabanli ve tek komutla (`pnpm sta
 4. Puppeteer tabanli image render servisi eklendi.
 5. React + Vite arayuz iskeleti, editor panelleri ve render modal baslatildi.
 
-## Faz 2 (Sonraki adim)
-1. Fabric.js ile gercek canvas manipulasyonu
-2. Layer drag-drop z-order
-3. Undo/Redo
-4. Asset upload entegrasyonunu toolbar uzerinden tamamlama
-5. Editor UX ince ayarlari
+## Faz 2 (Tamamlandi)
+1. Fabric.js ile gercek canvas manipulasyonu eklendi.
+2. Layer panelde drag-drop z-order siralama aktif edildi.
+3. Undo/Redo (toolbar + kisayol Ctrl+Z / Ctrl+Y) eklendi.
+4. Toolbar uzerinden asset upload edip image layer olusturma eklendi.
+5. Properties paneli text/image/shape tipleri icin genisletildi.
 
 ## Faz 3 (Sonraki adim)
 1. Remotion video render pipeline
@@ -26,3 +26,4 @@ Render endpoint'i n8n'den cagrilabilir, SQLite tabanli ve tek komutla (`pnpm sta
 - `/api/templates` ve `/api/render` API key ile korunuyor.
 - UI'da API key header localStorage uzerinden yonetiliyor.
 - Bu baslangic paketinde video render sadece placeholder olarak birakildi.
+- `.gitignore` runtime DB/output/artifact dosyalarini dislayacak sekilde guncellendi.

@@ -13,6 +13,8 @@ export default function Editor() {
   const resetTemplate = useEditorStore((state) => state.resetTemplate);
   const setTemplate = useEditorStore((state) => state.setTemplate);
   const renderResult = useEditorStore((state) => state.renderResult);
+  const undo = useEditorStore((state) => state.undo);
+  const redo = useEditorStore((state) => state.redo);
 
   const [error, setError] = useState('');
   const [showRenderModal, setShowRenderModal] = useState(false);
@@ -42,6 +44,30 @@ export default function Editor() {
       mounted = false;
     };
   }, [id, resetTemplate, setTemplate]);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      const targetTag = event.target?.tagName?.toLowerCase();
+      const isTypingElement =
+        targetTag === 'input' || targetTag === 'textarea' || event.target?.isContentEditable;
+      if (isTypingElement) {
+        return;
+      }
+
+      if (event.ctrlKey && event.key.toLowerCase() === 'z') {
+        event.preventDefault();
+        undo();
+      }
+
+      if (event.ctrlKey && event.key.toLowerCase() === 'y') {
+        event.preventDefault();
+        redo();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [redo, undo]);
 
   return (
     <section>

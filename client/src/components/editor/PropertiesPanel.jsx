@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import { useEditorStore } from '../../store/editorStore.js';
 
+const FONT_FAMILIES = ['Inter', 'Roboto', 'Playfair Display', 'Oswald', 'Montserrat'];
+
 function NumberField({ label, value, onChange }) {
   return (
     <label className="field">
@@ -10,6 +12,15 @@ function NumberField({ label, value, onChange }) {
         value={value ?? 0}
         onChange={(event) => onChange(Number(event.target.value))}
       />
+    </label>
+  );
+}
+
+function ToggleField({ label, checked, onChange }) {
+  return (
+    <label className="field field-inline">
+      <span>{label}</span>
+      <input type="checkbox" checked={checked} onChange={onChange} />
     </label>
   );
 }
@@ -68,6 +79,65 @@ export default function PropertiesPanel() {
           />
 
           <label className="field">
+            <span>Font ailesi</span>
+            <select
+              value={selectedLayer.fontFamily || 'Inter'}
+              onChange={(event) =>
+                updateLayer(selectedLayer.id, { fontFamily: event.target.value })
+              }
+            >
+              {FONT_FAMILIES.map((font) => (
+                <option key={font} value={font}>
+                  {font}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="field">
+            <span>Font agirligi</span>
+            <select
+              value={selectedLayer.fontWeight || 'normal'}
+              onChange={(event) =>
+                updateLayer(selectedLayer.id, { fontWeight: event.target.value })
+              }
+            >
+              <option value="normal">Normal</option>
+              <option value="bold">Bold</option>
+            </select>
+          </label>
+
+          <ToggleField
+            label="Italic"
+            checked={Boolean(selectedLayer.italic)}
+            onChange={(event) =>
+              updateLayer(selectedLayer.id, { italic: event.target.checked })
+            }
+          />
+
+          <ToggleField
+            label="Underline"
+            checked={Boolean(selectedLayer.underline)}
+            onChange={(event) =>
+              updateLayer(selectedLayer.id, { underline: event.target.checked })
+            }
+          />
+
+          <label className="field">
+            <span>Text align</span>
+            <select
+              value={selectedLayer.textAlign || 'left'}
+              onChange={(event) =>
+                updateLayer(selectedLayer.id, { textAlign: event.target.value })
+              }
+            >
+              <option value="left">Left</option>
+              <option value="center">Center</option>
+              <option value="right">Right</option>
+            </select>
+          </label>
+
+          <label className="field">
             <span>Renk</span>
             <input
               type="color"
@@ -81,29 +151,73 @@ export default function PropertiesPanel() {
       )}
 
       {selectedLayer.type === 'image' && (
-        <label className="field">
-          <span>Gorsel URL</span>
-          <input
-            value={selectedLayer.src || ''}
+        <>
+          <label className="field">
+            <span>Gorsel URL</span>
+            <input
+              value={selectedLayer.src || ''}
+              onChange={(event) =>
+                updateLayer(selectedLayer.id, { src: event.target.value })
+              }
+            />
+          </label>
+
+          <ToggleField
+            label="Orani koru"
+            checked={Boolean(selectedLayer.keepRatio)}
             onChange={(event) =>
-              updateLayer(selectedLayer.id, { src: event.target.value })
+              updateLayer(selectedLayer.id, { keepRatio: event.target.checked })
             }
           />
-        </label>
+        </>
       )}
 
       {(selectedLayer.type === 'rect' || selectedLayer.type === 'circle') && (
-        <label className="field">
-          <span>Dolgu</span>
-          <input
-            type="color"
-            value={selectedLayer.fill || '#2563eb'}
-            onChange={(event) =>
-              updateLayer(selectedLayer.id, { fill: event.target.value })
-            }
+        <>
+          <label className="field">
+            <span>Dolgu</span>
+            <input
+              type="color"
+              value={selectedLayer.fill || '#2563eb'}
+              onChange={(event) =>
+                updateLayer(selectedLayer.id, { fill: event.target.value })
+              }
+            />
+          </label>
+
+          <label className="field">
+            <span>Kenarlik rengi</span>
+            <input
+              type="color"
+              value={selectedLayer.stroke || '#000000'}
+              onChange={(event) =>
+                updateLayer(selectedLayer.id, { stroke: event.target.value })
+              }
+            />
+          </label>
+
+          <NumberField
+            label="Kenarlik kalinligi"
+            value={selectedLayer.strokeWidth || 0}
+            onChange={(value) => updateLayer(selectedLayer.id, { strokeWidth: value })}
           />
-        </label>
+        </>
       )}
+
+      <label className="field">
+        <span>Opacity (%)</span>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={Math.round((selectedLayer.opacity ?? 1) * 100)}
+          onChange={(event) =>
+            updateLayer(selectedLayer.id, {
+              opacity: Number(event.target.value) / 100,
+            })
+          }
+        />
+      </label>
 
       <NumberField
         label="X"
@@ -124,6 +238,24 @@ export default function PropertiesPanel() {
         label="Height"
         value={selectedLayer.height || 80}
         onChange={(value) => updateLayer(selectedLayer.id, { height: value })}
+      />
+
+      {selectedLayer.type === 'rect' && (
+        <NumberField
+          label="Corner radius"
+          value={selectedLayer.cornerRadius || 0}
+          onChange={(value) => updateLayer(selectedLayer.id, { cornerRadius: value })}
+        />
+      )}
+
+      <ToggleField
+        label="Variable aktif"
+        checked={Boolean(selectedLayer.variable)}
+        onChange={(event) =>
+          updateLayer(selectedLayer.id, {
+            variable: event.target.checked ? selectedLayer.variable || selectedLayer.name : '',
+          })
+        }
       />
 
       <label className="field">

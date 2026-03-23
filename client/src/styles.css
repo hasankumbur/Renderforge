@@ -91,6 +91,7 @@ textarea {
   border: 1px solid #334155;
   border-radius: 10px;
   padding: 12px;
+  min-height: 0;
 }
 
 .card-grid {
@@ -108,6 +109,11 @@ textarea {
   cursor: pointer;
 }
 
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .button.primary {
   background: #2563eb;
   border-color: #2563eb;
@@ -121,9 +127,9 @@ textarea {
 }
 
 .layer-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
   padding: 8px;
   border-radius: 8px;
@@ -137,18 +143,53 @@ textarea {
   background: #172554;
 }
 
+.layer-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.layer-variable-toggle {
+  display: inline-flex;
+  gap: 6px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.layer-variable-input {
+  border: 1px solid #334155;
+  background: #0b1220;
+  color: #e2e8f0;
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+
 .canvas-stage {
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   background: #374151;
+  padding: 8px;
+}
+
+.canvas-scroll {
+  width: 100%;
+  height: 100%;
   overflow: auto;
 }
 
-.canvas-surface {
-  position: relative;
+.canvas-board {
+  min-width: 100%;
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 36px;
+}
+
+.fabric-canvas {
   border: 1px solid #64748b;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
 }
 
 .toolbar {
@@ -156,6 +197,28 @@ textarea {
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 12px;
+}
+
+.toolbar-template-name {
+  min-width: 220px;
+}
+
+.toolbar-size-input {
+  width: 90px;
+}
+
+.toolbar-color-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-color-input input {
+  width: 36px;
+  height: 28px;
+  border: 0;
+  background: transparent;
+  padding: 0;
 }
 
 .field {
@@ -174,6 +237,12 @@ textarea {
   color: #e2e8f0;
   border-radius: 6px;
   padding: 8px;
+}
+
+.field-inline {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .modal-backdrop {
