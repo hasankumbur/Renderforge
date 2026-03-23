@@ -25,7 +25,7 @@ export default function Header({ session, onLogout, onToggleMenu }) {
       <div className="header-right">
         <input
           className="api-key-input"
-          placeholder="X-API-Key"
+          placeholder="rforge_dev_secret"
           value={apiKey}
           onChange={(event) => handleChange(event.target.value)}
         />
