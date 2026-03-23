@@ -27,10 +27,10 @@ export default function Templates() {
   }, []);
 
   return (
-    <section>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+    <section className="page-stack">
+      <div className="page-title-row">
         <h2>Templates</h2>
-        <button className="button primary" type="button" onClick={() => navigate('/editor')}>
+        <button className="button primary" type="button" onClick={() => navigate('/app/editor')}>
           Yeni Template
         </button>
       </div>
@@ -49,7 +49,7 @@ export default function Templates() {
             </div>
 
             <div style={{ display: 'flex', gap: 8 }}>
-              <Link className="button" to={`/editor/${template.id}`}>
+              <Link className="button" to={`/app/editor/${template.id}`}>
                 Duzenle
               </Link>
             </div>

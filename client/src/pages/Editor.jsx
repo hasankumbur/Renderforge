@@ -75,7 +75,7 @@ export default function Editor() {
       {error && <p style={{ color: '#fca5a5' }}>{error}</p>}
 
       {renderResult?.url && (
-        <p>
+        <p className="render-result-link">
           Son render:{' '}
           <a href={renderResult.url} target="_blank" rel="noreferrer">
             {renderResult.url}
