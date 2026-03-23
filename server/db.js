@@ -203,4 +203,14 @@ export function listRenders(filters = {}) {
   return stmt.all();
 }
 
+export function markProcessingRendersAsError(message) {
+  const stmt = db.prepare(
+    `UPDATE renders
+     SET status = 'error',
+         error_msg = ?
+     WHERE status = 'processing'`
+  );
+  return stmt.run(message).changes;
+}
+
 export { db };

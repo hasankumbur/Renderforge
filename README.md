@@ -6,6 +6,7 @@ RenderForge MVP, template tabanli gorsel uretimi icin Node.js + React + SQLite t
 - Backend: Node.js 20, Express, better-sqlite3
 - Frontend: React + Vite
 - Render (image): Puppeteer
+- Render (video): Remotion (`@remotion/bundler`, `@remotion/renderer`)
 - Veri tabani: SQLite
 - Depolama: Local filesystem (`uploads`, `outputs`)
 
@@ -63,6 +64,9 @@ pnpm start
 npm install -g pm2
 pm2 start "pnpm start" --name renderforge
 pm2 save
+
+# 7) Testler
+pnpm test
 ```
 
 ## API notlari
@@ -79,10 +83,15 @@ Asagidaki endpointler `X-API-Key` ister:
 - `POST /api/render`
 - `GET /api/render/history`
 
+`POST /api/render` artik image ve video ciktisi alir:
+- Image formatlari: `png`, `jpeg`, `webp`
+- Video formatlari: `mp4`, `gif`
+- Video icin opsiyonel alanlar: `fps`, `durationSeconds`
+
 ## Baslangic durumu
 Bu iterasyonda:
 - Backend CRUD ve image render akisi hazirlandi.
 - Frontend editor paneli Fabric.js canvas ile aktif hale getirildi.
 - Layer drag-drop z-order, undo/redo ve gorsel upload akisi eklendi.
 - Properties paneli text/image/shape alanlariyla gelistirildi.
-- Video render (Remotion) hala sonraki fazda.
+- Remotion ile video render (MP4/GIF) ve render queue altyapisi eklendi.

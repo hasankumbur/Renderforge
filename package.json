@@ -8,7 +8,8 @@
     "dev:server": "cd server && node --watch index.js",
     "dev:client": "cd client && vite",
     "build": "cd client && vite build",
-    "start": "pnpm run build && node server/index.js"
+    "start": "pnpm run build && node server/index.js",
+    "test": "node --test server/tests/*.test.mjs"
   },
   "dependencies": {
     "better-sqlite3": "latest",
@@ -18,6 +19,8 @@
     "fabric": "latest",
     "multer": "latest",
     "nanoid": "latest",
+    "@remotion/bundler": "latest",
+    "@remotion/renderer": "latest",
     "puppeteer": "latest",
     "react": "latest",
     "react-dom": "latest",

@@ -2,6 +2,11 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
+import {
+  applyOverridesToSchema,
+  parseTemplateSchema,
+  safeImageFormat,
+} from './schemaUtils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,36 +19,6 @@ function escapeHtml(value) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
-}
-
-function applyOverrides(schema, overrides = {}) {
-  const layers = (schema.layers || []).map((layer) => {
-    if (!layer.variable) {
-      return layer;
-    }
-
-    const overrideValue = overrides[layer.variable];
-    if (overrideValue === undefined || overrideValue === null) {
-      return layer;
-    }
-
-    if (layer.type === 'text') {
-      return { ...layer, text: String(overrideValue) };
-    }
-
-    if (layer.type === 'image') {
-      return { ...layer, src: String(overrideValue) };
-    }
-
-    return { ...layer, value: overrideValue };
-  });
-
-  return {
-    background: schema.background || '#ffffff',
-    width: schema.width || 1080,
-    height: schema.height || 1080,
-    layers,
-  };
 }
 
 function layerToHtml(layer) {
@@ -145,20 +120,10 @@ export async function renderTemplateToImage({
   overrides,
   format = 'png',
 }) {
-  const rawSchema =
-    typeof template.schema === 'string' ? JSON.parse(template.schema) : template.schema;
-
-  const schema = applyOverrides(
-    {
-      ...rawSchema,
-      width: template.width,
-      height: template.height,
-    },
-    overrides
-  );
+  const schema = applyOverridesToSchema(parseTemplateSchema(template), overrides);
 
   const html = schemaToHtml(schema);
-  const safeFormat = ['png', 'jpeg', 'webp'].includes(format) ? format : 'png';
+  const safeFormat = safeImageFormat(format);
 
   const outputDir = path.join(rootDir, 'outputs');
   await fs.mkdir(outputDir, { recursive: true });

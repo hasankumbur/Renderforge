@@ -17,10 +17,11 @@ Render endpoint'i n8n'den cagrilabilir, SQLite tabanli ve tek komutla (`pnpm sta
 4. Toolbar uzerinden asset upload edip image layer olusturma eklendi.
 5. Properties paneli text/image/shape tipleri icin genisletildi.
 
-## Faz 3 (Sonraki adim)
-1. Remotion video render pipeline
-2. Render queue/dayaniklilik iyilestirmeleri
-3. Testler ve deployment hardening
+## Faz 3 (Tamamlandi)
+1. Remotion tabanli video render pipeline eklendi (MP4 + GIF).
+2. In-memory render queue ile islerin sira bazli islenmesi eklendi.
+3. Sunucu yeniden basladiginda `processing` kalan kayitlar `error` durumuna alinacak sekilde dayaniklilik eklendi.
+4. `server/tests` altinda utility testleri eklendi (`pnpm test`).
 
 ## Kritik notlar
 - `/api/templates` ve `/api/render` API key ile korunuyor.

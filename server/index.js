@@ -4,7 +4,7 @@ import express from 'express';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { initDb } from './db.js';
+import { initDb, markProcessingRendersAsError } from './db.js';
 import { requireApiKey } from './middleware/auth.js';
 import assetsRouter from './routes/assets.js';
 import renderRouter from './routes/render.js';
@@ -27,6 +27,9 @@ async function ensureRuntimeDirs() {
 async function startServer() {
   await ensureRuntimeDirs();
   initDb();
+  const recoveredCount = markProcessingRendersAsError(
+    'Sunucu yeniden baslatildi. Render islemi yarida kaldi.'
+  );
 
   const app = express();
 
@@ -72,6 +75,10 @@ async function startServer() {
   app.listen(port, () => {
     // eslint-disable-next-line no-console
     console.log(`RenderForge MVP hazir: http://localhost:${port}`);
+    if (recoveredCount > 0) {
+      // eslint-disable-next-line no-console
+      console.log(`Yarida kalan ${recoveredCount} render kaydi error durumuna alindi.`);
+    }
   });
 }
 

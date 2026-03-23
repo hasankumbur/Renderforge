@@ -8,6 +8,13 @@ import {
   updateRender,
 } from '../db.js';
 import { renderTemplateToImage } from '../services/imageRenderer.js';
+import { renderQueue } from '../services/renderQueue.js';
+import { renderTemplateToVideo } from '../services/videoRenderer.js';
+import {
+  normalizeVideoOptions,
+  safeImageFormat,
+  safeVideoFormat,
+} from '../services/schemaUtils.js';
 
 const router = express.Router();
 
@@ -18,6 +25,15 @@ router.get('/history', (req, res) => {
 
 router.post('/', async (req, res) => {
   const { templateId, outputType = 'image', format = 'png', overrides = {} } = req.body;
+  const resolvedOutputType = String(outputType || 'image').toLowerCase();
+
+  if (overrides && (typeof overrides !== 'object' || Array.isArray(overrides))) {
+    return res.status(400).json({
+      success: false,
+      error: 'overrides alani key-value obje olmalidir',
+      code: 'INVALID_OVERRIDES',
+    });
+  }
 
   if (!templateId) {
     return res.status(400).json({
@@ -36,52 +52,91 @@ router.post('/', async (req, res) => {
     });
   }
 
-  if (outputType !== 'image') {
+  if (!['image', 'video'].includes(resolvedOutputType)) {
     return res.status(400).json({
       success: false,
-      error: 'Bu asamada sadece image render destekleniyor',
+      error: 'outputType alani image veya video olmali',
       code: 'OUTPUT_TYPE_NOT_SUPPORTED',
     });
   }
 
+  const safeFormat =
+    resolvedOutputType === 'image' ? safeImageFormat(format) : safeVideoFormat(format);
+  const videoOptions =
+    resolvedOutputType === 'video'
+      ? normalizeVideoOptions({
+          fps: req.body.fps,
+          durationSeconds: req.body.durationSeconds,
+        })
+      : null;
+
   const renderId = nanoid(14);
+  const hostUrl = process.env.HOST_URL || `${req.protocol}://${req.get('host')}`;
 
   createRender({
     id: renderId,
     template_id: templateId,
-    output_type: outputType,
-    status: 'processing',
-    input_data: JSON.stringify(overrides || {}),
+    output_type: resolvedOutputType,
+    status: 'pending',
+    input_data: JSON.stringify({
+      overrides: overrides || {},
+      format: safeFormat,
+      ...(videoOptions || {}),
+    }),
     output_path: null,
     output_url: null,
     error_msg: null,
   });
 
   try {
-    const { outputRelativePath } = await renderTemplateToImage({
-      renderId,
-      template,
-      overrides,
-      format,
-    });
+    const queueTimeoutMs = resolvedOutputType === 'video' ? 20 * 60 * 1000 : 5 * 60 * 1000;
 
-    const hostUrl = process.env.HOST_URL || `${req.protocol}://${req.get('host')}`;
-    const outputUrl = `${hostUrl}${outputRelativePath}`;
+    const result = await renderQueue.enqueue(
+      async () => {
+        updateRender(renderId, {
+          status: 'processing',
+        });
 
-    const updated = updateRender(renderId, {
-      status: 'done',
-      output_path: outputRelativePath,
-      output_url: outputUrl,
-      error_msg: null,
-    });
+        const renderOutput =
+          resolvedOutputType === 'image'
+            ? await renderTemplateToImage({
+                renderId,
+                template,
+                overrides,
+                format: safeFormat,
+              })
+            : await renderTemplateToVideo({
+                renderId,
+                template,
+                overrides,
+                format: safeFormat,
+                fps: videoOptions.fps,
+                durationSeconds: videoOptions.durationSeconds,
+              });
+
+        const outputUrl = `${hostUrl}${renderOutput.outputRelativePath}`;
+        const updated = updateRender(renderId, {
+          status: 'done',
+          output_path: renderOutput.outputRelativePath,
+          output_url: outputUrl,
+          error_msg: null,
+        });
+
+        return {
+          outputUrl,
+          createdAt: updated?.created_at ?? new Date().toISOString(),
+        };
+      },
+      { timeoutMs: queueTimeoutMs }
+    );
 
     return res.json({
       success: true,
       renderId,
-      url: outputUrl,
-      outputType,
+      url: result.outputUrl,
+      outputType: resolvedOutputType,
       templateId,
-      createdAt: updated?.created_at ?? new Date().toISOString(),
+      createdAt: result.createdAt,
     });
   } catch (error) {
     updateRender(renderId, {
