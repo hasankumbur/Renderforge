@@ -63,10 +63,15 @@ const mobileLinks = [
   { to: '/app/profile', label: 'Profil', icon: UserIcon },
 ];
 
-export default function Sidebar({ open, onClose }) {
+export default function Sidebar({
+  open,
+  onClose,
+  hideMobileNav = false,
+  hideDesktopSidebar = false,
+}) {
   return (
     <>
-      <aside className={open ? 'sidebar open' : 'sidebar'}>
+      <aside className={hideDesktopSidebar ? 'sidebar hidden' : open ? 'sidebar open' : 'sidebar'}>
         <div className="sidebar-section-title">UYGULAMA</div>
         {links.map((item) => (
           <NavLink
@@ -84,7 +89,7 @@ export default function Sidebar({ open, onClose }) {
       </aside>
       {open && <button className="sidebar-overlay" onClick={onClose} aria-label="close menu" />}
 
-      <nav className="mobile-bottom-nav">
+      <nav className={hideMobileNav ? 'mobile-bottom-nav hidden' : 'mobile-bottom-nav'}>
         <NavLink
           to="/app/dashboard"
           className={({ isActive }) =>

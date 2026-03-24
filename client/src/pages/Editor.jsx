@@ -63,6 +63,24 @@ function RenderIcon() {
   );
 }
 
+function BackIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M15 18l-6-6 6-6" />
+    </svg>
+  );
+}
+
+function MoreIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="6" cy="12" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="18" cy="12" r="1.5" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 export default function Editor() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
@@ -79,6 +97,7 @@ export default function Editor() {
   const [error, setError] = useState('');
   const [showRenderModal, setShowRenderModal] = useState(false);
   const [mobileEditorTab, setMobileEditorTab] = useState('canvas');
+  const [mobileToolsOpen, setMobileToolsOpen] = useState(false);
 
   useEffect(() => {
     if (!id) {
@@ -147,6 +166,19 @@ export default function Editor() {
 
   return (
     <section className="editor-page">
+      <header className="editor-mobile-header">
+        <button type="button" className="editor-mobile-header-btn" onClick={() => window.history.back()}>
+          <BackIcon />
+        </button>
+        <div className="editor-mobile-header-title-wrap">
+          <strong className="editor-mobile-header-title">Editor</strong>
+          <small className="editor-mobile-header-subtitle">Mobil duzenleme</small>
+        </div>
+        <button type="button" className="editor-mobile-header-btn" aria-label="diger aksiyonlar">
+          <MoreIcon />
+        </button>
+      </header>
+
       <Toolbar onOpenRender={() => setShowRenderModal(true)} />
       {error && <p style={{ color: '#fca5a5' }}>{error}</p>}
 
@@ -163,23 +195,32 @@ export default function Editor() {
         <button
           type="button"
           className={mobileEditorTab === 'layers' ? 'button primary' : 'button'}
-          onClick={() => setMobileEditorTab('layers')}
+          onClick={() => {
+            setMobileToolsOpen(false);
+            setMobileEditorTab('layers');
+          }}
         >
           Layers
         </button>
         <button
           type="button"
           className={mobileEditorTab === 'canvas' ? 'button primary' : 'button'}
-          onClick={() => setMobileEditorTab('canvas')}
+          onClick={() => {
+            setMobileToolsOpen(false);
+            setMobileEditorTab('canvas');
+          }}
         >
           Canvas
         </button>
         <button
           type="button"
-          className={mobileEditorTab === 'props' ? 'button primary' : 'button'}
-          onClick={() => setMobileEditorTab('props')}
+          className={mobileToolsOpen ? 'button primary' : 'button'}
+          onClick={() => {
+            setMobileEditorTab('props');
+            setMobileToolsOpen((prev) => !prev);
+          }}
         >
-          Ozellikler
+          Araclar
         </button>
       </div>
 
@@ -190,7 +231,13 @@ export default function Editor() {
         <div className={mobileEditorTab === 'canvas' ? 'editor-col active' : 'editor-col'}>
           <Canvas />
         </div>
-        <div className={mobileEditorTab === 'props' ? 'editor-col active' : 'editor-col'}>
+        <div
+          className={
+            mobileToolsOpen || mobileEditorTab === 'props'
+              ? 'editor-col tools-drawer active'
+              : 'editor-col tools-drawer'
+          }
+        >
           <PropertiesPanel />
         </div>
       </div>

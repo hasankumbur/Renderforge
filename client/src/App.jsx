@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Header from './components/shared/Header.jsx';
 import Sidebar from './components/shared/Sidebar.jsx';
 import Dashboard from './pages/Dashboard.jsx';
@@ -36,16 +36,28 @@ function saveSession(session) {
 
 function AppArea({ session }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const isEditorRoute = location.pathname.startsWith('/app/editor');
 
   return (
-    <div className="app-shell">
-      <Header
-        session={session}
-        onToggleMenu={() => setMobileMenuOpen((prev) => !prev)}
-      />
+    <div className={isEditorRoute ? 'app-shell editor-route' : 'app-shell'}>
+      {!isEditorRoute && (
+        <Header
+          session={session}
+          onToggleMenu={() => setMobileMenuOpen((prev) => !prev)}
+        />
+      )}
       <div className="app-content">
-        <Sidebar open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
-        <main className="page-container" onClick={() => setMobileMenuOpen(false)}>
+        <Sidebar
+          open={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          hideMobileNav={isEditorRoute}
+          hideDesktopSidebar={isEditorRoute}
+        />
+        <main
+          className={isEditorRoute ? 'page-container editor-route' : 'page-container'}
+          onClick={() => setMobileMenuOpen(false)}
+        >
           <Routes>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="templates" element={<Templates />} />

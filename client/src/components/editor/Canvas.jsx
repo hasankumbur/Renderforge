@@ -36,7 +36,9 @@ function fitCanvasToStage(canvas, stage, template) {
     availableWidth / templateWidth,
     availableHeight / templateHeight
   );
-  const zoom = Math.max(MIN_FIT_ZOOM, fitZoom);
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 430;
+  const maxMobileZoom = 0.52;
+  const zoom = Math.max(MIN_FIT_ZOOM, isMobile ? Math.min(fitZoom, maxMobileZoom) : fitZoom);
   const scaledWidth = templateWidth * zoom;
   const scaledHeight = templateHeight * zoom;
   const offsetX = Math.max(0, (stageWidth - scaledWidth) / 2);
