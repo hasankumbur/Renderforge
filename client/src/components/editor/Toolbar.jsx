@@ -25,7 +25,6 @@ export default function Toolbar({ onOpenRender }) {
   const [error, setError] = useState('');
   const [customWidth, setCustomWidth] = useState(template.width);
   const [customHeight, setCustomHeight] = useState(template.height);
-  const [compactOpen, setCompactOpen] = useState(false);
 
   useEffect(() => {
     setCustomWidth(template.width);
@@ -88,22 +87,8 @@ export default function Toolbar({ onOpenRender }) {
   const matchedSize = canvasSizes.find((item) => item.label === sizeValue);
 
   return (
-    <div>
-      <div className="toolbar-mobile-head">
-        <button className="button" type="button" onClick={() => setCompactOpen((prev) => !prev)}>
-          {compactOpen ? 'Araçları Gizle' : 'Araçları Aç'}
-        </button>
-      </div>
-
-      <div className={compactOpen ? 'toolbar toolbar-open' : 'toolbar'}>
-        <input
-          ref={uploadInputRef}
-          type="file"
-          accept="image/*"
-          style={{ display: 'none' }}
-          onChange={handleAssetUpload}
-        />
-
+    <div className="editor-toolbar">
+      <div className="editor-toolbar-top panel">
         <input
           className="button toolbar-template-name"
           value={template.name}
@@ -111,6 +96,45 @@ export default function Toolbar({ onOpenRender }) {
             setTemplateMeta({ name: event.target.value }, { recordHistory: false })
           }
           placeholder="Template adi"
+        />
+        <div className="editor-toolbar-top-actions">
+          <button
+            className="button toolbar-action-undo"
+            type="button"
+            onClick={undo}
+            disabled={!historyCount}
+          >
+            Undo
+          </button>
+          <button
+            className="button toolbar-action-redo"
+            type="button"
+            onClick={redo}
+            disabled={!futureCount}
+          >
+            Redo
+          </button>
+          <button className="button primary" type="button" onClick={saveTemplate} disabled={saving}>
+            {saving ? 'Kaydediliyor...' : 'Kaydet'}
+          </button>
+          <button
+            className="button toolbar-action-render"
+            type="button"
+            onClick={onOpenRender}
+            disabled={!template.id}
+          >
+            Render
+          </button>
+        </div>
+      </div>
+
+      <div className="toolbar">
+        <input
+          ref={uploadInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={handleAssetUpload}
         />
 
         <button className="button" type="button" onClick={() => addLayer('text')}>
@@ -193,20 +217,6 @@ export default function Toolbar({ onOpenRender }) {
             }
           />
         </label>
-
-        <button className="button" type="button" onClick={undo} disabled={!historyCount}>
-          Undo
-        </button>
-        <button className="button" type="button" onClick={redo} disabled={!futureCount}>
-          Redo
-        </button>
-
-        <button className="button primary" type="button" onClick={saveTemplate} disabled={saving}>
-          {saving ? 'Kaydediliyor...' : 'Kaydet'}
-        </button>
-        <button className="button" type="button" onClick={onOpenRender} disabled={!template.id}>
-          Render Al
-        </button>
       </div>
       {error && <p style={{ color: '#fca5a5', marginTop: 8 }}>{error}</p>}
     </div>

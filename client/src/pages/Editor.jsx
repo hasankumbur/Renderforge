@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import Canvas from '../components/editor/Canvas.jsx';
 import LayerPanel from '../components/editor/LayerPanel.jsx';
 import PropertiesPanel from '../components/editor/PropertiesPanel.jsx';
@@ -8,10 +8,70 @@ import Toolbar from '../components/editor/Toolbar.jsx';
 import { api } from '../lib/api.js';
 import { useEditorStore } from '../store/editorStore.js';
 
+const editorPresets = {
+  'instagram-post': {
+    name: 'Instagram Post',
+    width: 1080,
+    height: 1080,
+  },
+  'instagram-story': {
+    name: 'Instagram Story',
+    width: 1080,
+    height: 1920,
+  },
+  'facebook-post': {
+    name: 'Facebook Gonderisi',
+    width: 1080,
+    height: 1080,
+  },
+  'tiktok-video': {
+    name: 'TikTok Videosu',
+    width: 1080,
+    height: 1920,
+  },
+  'youtube-short': {
+    name: 'YouTube Short',
+    width: 1080,
+    height: 1920,
+  },
+};
+
+function UndoIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M9 8H5v4" />
+      <path d="M5 12c1.8-3 4.4-4.5 7.8-4.5A7.2 7.2 0 0 1 20 14.7" />
+    </svg>
+  );
+}
+
+function RedoIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M15 8h4v4" />
+      <path d="M19 12c-1.8-3-4.4-4.5-7.8-4.5A7.2 7.2 0 0 0 4 14.7" />
+    </svg>
+  );
+}
+
+function RenderIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+      <rect x="4" y="5" width="16" height="14" rx="3" />
+      <polygon points="10,9 16,12 10,15" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 export default function Editor() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const presetKey = searchParams.get('preset');
   const resetTemplate = useEditorStore((state) => state.resetTemplate);
   const setTemplate = useEditorStore((state) => state.setTemplate);
+  const templateId = useEditorStore((state) => state.template.id);
+  const historyCount = useEditorStore((state) => state.history.length);
+  const futureCount = useEditorStore((state) => state.future.length);
   const renderResult = useEditorStore((state) => state.renderResult);
   const undo = useEditorStore((state) => state.undo);
   const redo = useEditorStore((state) => state.redo);
@@ -22,11 +82,26 @@ export default function Editor() {
 
   useEffect(() => {
     if (!id) {
+      const preset = presetKey ? editorPresets[presetKey] : null;
       resetTemplate();
+      if (preset) {
+        setTemplate({
+          name: preset.name,
+          width: preset.width,
+          height: preset.height,
+          schema: {
+            background: '#ffffff',
+            width: preset.width,
+            height: preset.height,
+            layers: [],
+          },
+        });
+      }
       return;
     }
 
     let mounted = true;
+    setError('');
 
     api
       .getTemplate(id)
@@ -44,7 +119,7 @@ export default function Editor() {
     return () => {
       mounted = false;
     };
-  }, [id, resetTemplate, setTemplate]);
+  }, [id, presetKey, resetTemplate, setTemplate]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -71,7 +146,7 @@ export default function Editor() {
   }, [redo, undo]);
 
   return (
-    <section>
+    <section className="editor-page">
       <Toolbar onOpenRender={() => setShowRenderModal(true)} />
       {error && <p style={{ color: '#fca5a5' }}>{error}</p>}
 
@@ -84,7 +159,7 @@ export default function Editor() {
         </p>
       )}
 
-      <div className="editor-mobile-tabs">
+      <div className="editor-mobile-tabs panel">
         <button
           type="button"
           className={mobileEditorTab === 'layers' ? 'button primary' : 'button'}
@@ -118,6 +193,36 @@ export default function Editor() {
         <div className={mobileEditorTab === 'props' ? 'editor-col active' : 'editor-col'}>
           <PropertiesPanel />
         </div>
+      </div>
+
+      <div className="editor-floating-actions">
+        <button
+          type="button"
+          className="editor-floating-btn"
+          onClick={undo}
+          disabled={!historyCount}
+          aria-label="undo"
+        >
+          <UndoIcon />
+        </button>
+        <button
+          type="button"
+          className="editor-floating-btn"
+          onClick={redo}
+          disabled={!futureCount}
+          aria-label="redo"
+        >
+          <RedoIcon />
+        </button>
+        <button
+          type="button"
+          className="editor-floating-btn"
+          onClick={() => setShowRenderModal(true)}
+          disabled={!templateId}
+          aria-label="render"
+        >
+          <RenderIcon />
+        </button>
       </div>
 
       {showRenderModal && <RenderModal onClose={() => setShowRenderModal(false)} />}

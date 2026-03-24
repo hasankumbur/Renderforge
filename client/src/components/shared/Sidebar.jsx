@@ -21,11 +21,11 @@ function GridIcon() {
   );
 }
 
-function PlusIcon() {
+function EditIcon() {
   return (
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2">
-      <path d="M12 5v14" />
-      <path d="M5 12h14" />
+      <path d="M6 17.5L16.5 7l2.5 2.5L8.5 20H6z" />
+      <path d="M14.8 8.7l2.5 2.5" />
     </svg>
   );
 }
@@ -58,7 +58,7 @@ const links = [
 
 const mobileLinks = [
   { to: '/app/templates', label: 'Sablonlar', icon: GridIcon },
-  { to: '/app/editor', label: 'Editor', icon: PlusIcon, center: true },
+  { to: '/app/editor', label: 'Editor', icon: EditIcon },
   { to: '/app/renders', label: 'Renders', icon: PlayIcon },
   { to: '/app/profile', label: 'Profil', icon: UserIcon },
 ];
@@ -102,16 +102,7 @@ export default function Sidebar({ open, onClose }) {
           <NavLink
             key={item.to}
             to={item.to}
-            className={({ isActive }) => {
-              const classNames = ['mobile-bottom-link'];
-              if (isActive) {
-                classNames.push('active');
-              }
-              if (item.center) {
-                classNames.push('center');
-              }
-              return classNames.join(' ');
-            }}
+            className={({ isActive }) => (isActive ? 'mobile-bottom-link active' : 'mobile-bottom-link')}
             end={item.to === '/app/dashboard'}
           >
             <span className="icon">

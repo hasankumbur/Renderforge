@@ -4,6 +4,59 @@ import { api } from '../lib/api.js';
 
 const quickChips = ['Tum', 'Instagram', 'Facebook', 'TikTok', 'YouTube', 'Reklam'];
 
+const createOptionDefinitions = [
+  {
+    key: 'instagram-post',
+    name: 'Instagram Post',
+    platform: 'Instagram',
+    icon: 'instagramSquare',
+    gradient: 'linear-gradient(135deg, #dd2a7b, #8134af)',
+    terms: ['instagram', 'post', 'gonderi'],
+    width: 1080,
+    height: 1080,
+  },
+  {
+    key: 'instagram-story',
+    name: 'Instagram Story',
+    platform: 'Instagram',
+    icon: 'instagram',
+    gradient: 'linear-gradient(135deg, #f58529, #dd2a7b, #8134af)',
+    terms: ['instagram', 'story', 'hikaye'],
+    width: 1080,
+    height: 1920,
+  },
+  {
+    key: 'facebook-post',
+    name: 'Facebook Gonderisi',
+    platform: 'Facebook',
+    icon: 'facebook',
+    gradient: 'linear-gradient(135deg, #1877f2, #0a4fd6)',
+    terms: ['facebook', 'meta', 'gonderi', 'post'],
+    width: 1080,
+    height: 1080,
+  },
+  {
+    key: 'tiktok-video',
+    name: 'TikTok Videosu',
+    platform: 'TikTok',
+    icon: 'tiktok',
+    gradient: 'linear-gradient(135deg, #010101, #69c9d0, #ee1d52)',
+    terms: ['tiktok', 'video'],
+    width: 1080,
+    height: 1920,
+  },
+  {
+    key: 'youtube-short',
+    name: 'YouTube Short',
+    platform: 'YouTube',
+    icon: 'shorts',
+    gradient: 'linear-gradient(135deg, #ff0000, #cc0000)',
+    terms: ['youtube', 'short', 'kisa'],
+    width: 1080,
+    height: 1920,
+  },
+];
+
 const categoryVisuals = {
   instagram: {
     icon: 'instagram',
@@ -287,31 +340,50 @@ export default function Dashboard() {
   );
 
   const categoryRows = useMemo(() => {
-    const buckets = new Map();
+    const matchedTemplateIds = new Set();
 
-    templateRows.forEach((template) => {
-      const key = toSearchText(template.name || template.id).trim();
-      if (!buckets.has(key)) {
+    const presetRows = createOptionDefinitions.map((option) => {
+      const matchedTemplates = templateRows.filter((template) =>
+        option.terms.some((term) => template.searchIndex.includes(term))
+      );
+      matchedTemplates.forEach((template) => matchedTemplateIds.add(template.id));
+
+      return {
+        key: option.key,
+        name: option.name,
+        icon: option.icon,
+        gradient: option.gradient,
+        platform: option.platform,
+        templateId: matchedTemplates[0]?.id || null,
+        presetKey: option.key,
+        sizeLabel: `${option.width}x${option.height}px`,
+        count: matchedTemplates.length,
+        searchIndex: toSearchText(
+          `${option.name} ${option.platform} ${option.width}x${option.height}`
+        ),
+      };
+    });
+
+    const dynamicRows = templateRows
+      .filter((template) => !matchedTemplateIds.has(template.id))
+      .slice(0, 6)
+      .map((template) => {
         const visual = detectCategoryVisual(template.name);
-        buckets.set(key, {
-          key,
+        return {
+          key: `template-${template.id}`,
           name: template.name || 'Adsiz kategori',
           icon: visual.icon,
           gradient: visual.gradient,
           platform: detectPlatform(template.name),
-          count: 0,
           templateId: template.id,
-          searchIndex: toSearchText(`${template.name || ''} ${detectPlatform(template.name)}`),
-        });
-      }
+          presetKey: null,
+          sizeLabel: `${template.width}x${template.height}px`,
+          count: 1,
+          searchIndex: toSearchText(`${template.name} ${template.width}x${template.height}`),
+        };
+      });
 
-      const current = buckets.get(key);
-      current.count += 1;
-    });
-
-    return Array.from(buckets.values()).sort(
-      (a, b) => b.count - a.count || a.name.localeCompare(b.name, 'tr')
-    );
+    return [...presetRows, ...dynamicRows];
   }, [templateRows]);
 
   const filteredCategories = useMemo(() => {
@@ -382,13 +454,23 @@ export default function Dashboard() {
               key={item.key}
               type="button"
               className="category-item"
-              onClick={() => navigate(`/app/editor/${item.templateId}`)}
+              onClick={() => {
+                if (item.templateId) {
+                  navigate(`/app/editor/${item.templateId}`);
+                  return;
+                }
+                if (item.presetKey) {
+                  navigate(`/app/editor?preset=${item.presetKey}`);
+                  return;
+                }
+                navigate('/app/editor');
+              }}
             >
               <span className="category-icon" style={{ background: item.gradient }}>
                 <CategoryIcon type={item.icon} />
               </span>
               <span className="category-label">{item.name}</span>
-              <small className="category-meta">{item.count} sablon</small>
+              <small className="category-meta">{item.sizeLabel} · {item.count} sablon</small>
             </button>
           ))}
         </div>

@@ -688,10 +688,64 @@ textarea {
   min-height: 0;
 }
 
+.editor-page {
+  display: grid;
+  gap: 10px;
+}
+
+.editor-floating-actions {
+  position: fixed;
+  right: 12px;
+  bottom: calc(84px + env(safe-area-inset-bottom));
+  z-index: 62;
+  display: grid;
+  gap: 8px;
+}
+
+.editor-floating-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: 1px solid rgba(124, 58, 237, 0.5);
+  background: rgba(18, 18, 26, 0.9);
+  color: #c4b5fd;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+}
+
+.editor-floating-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.editor-toolbar {
+  display: grid;
+  gap: 10px;
+}
+
+.editor-toolbar-top {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+
+.editor-toolbar-top-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .editor-mobile-tabs {
   display: flex;
   gap: 8px;
   margin-bottom: 10px;
+  padding: 8px;
+  background: rgba(18, 18, 26, 0.85);
+  border: 1px solid #25253a;
+  border-radius: 14px;
+  overflow-x: auto;
 }
 
 .render-result-link {
@@ -737,10 +791,10 @@ textarea {
 
 .canvas-stage {
   min-height: 360px;
-  background: #0f1220;
-  border: 1px solid #1f2937;
+  background: linear-gradient(180deg, #0f1220 0%, #0b0d18 100%);
+  border: 1px solid #2a2f46;
   border-radius: 16px;
-  padding: 8px;
+  padding: 10px;
 }
 
 .canvas-scroll {
@@ -754,7 +808,7 @@ textarea {
   min-height: 100%;
   display: grid;
   place-items: center;
-  padding: 12px;
+  padding: 10px;
 }
 
 .fabric-canvas {
@@ -768,10 +822,15 @@ textarea {
 }
 
 .toolbar {
-  display: none;
-  flex-wrap: wrap;
+  display: flex;
+  overflow-x: auto;
+  flex-wrap: nowrap;
   gap: 8px;
   margin-bottom: 12px;
+  padding: 8px;
+  border-radius: 14px;
+  border: 1px solid #25253a;
+  background: rgba(18, 18, 26, 0.9);
 }
 
 .toolbar.toolbar-open {
@@ -782,8 +841,13 @@ textarea {
   min-width: 100%;
 }
 
+.toolbar-action-undo,
+.toolbar-action-redo {
+  display: none;
+}
+
 .toolbar-size-input {
-  width: 78px;
+  width: 74px;
 }
 
 .toolbar-color-input {
@@ -836,12 +900,13 @@ textarea {
 }
 
 .mobile-bottom-link {
-  min-width: 56px;
+  min-width: 52px;
   display: grid;
   justify-items: center;
   gap: 2px;
   color: var(--text-muted);
   font-size: 10px;
+  flex: 1;
 }
 
 .mobile-bottom-link .icon {
@@ -869,29 +934,6 @@ textarea {
   height: 4px;
   border-radius: 50%;
   background: var(--accent-purple);
-}
-
-.mobile-bottom-link.center {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
-  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.5);
-  color: #fff;
-  transform: translateY(-8px);
-}
-
-.mobile-bottom-link.center .icon {
-  font-size: 24px;
-}
-
-.mobile-bottom-link.center .icon svg {
-  width: 24px;
-  height: 24px;
-}
-
-.mobile-bottom-link.center span:last-child {
-  display: none;
 }
 
 .section-reveal {
@@ -963,6 +1005,19 @@ textarea {
     min-height: calc(100vh - 220px);
   }
 
+  .editor-floating-actions {
+    display: none;
+  }
+
+  .editor-toolbar-top {
+    grid-template-columns: minmax(220px, 1fr) auto;
+    align-items: center;
+  }
+
+  .editor-toolbar-top-actions {
+    flex-wrap: nowrap;
+  }
+
   .editor-mobile-tabs {
     display: none;
   }
@@ -971,12 +1026,9 @@ textarea {
     display: block;
   }
 
-  .toolbar-mobile-head {
-    display: none;
-  }
-
   .toolbar {
-    display: flex;
+    flex-wrap: wrap;
+    overflow: visible;
   }
 
   .toolbar-template-name {
@@ -985,6 +1037,11 @@ textarea {
 
   .toolbar-size-input {
     width: 90px;
+  }
+
+  .toolbar-action-undo,
+  .toolbar-action-redo {
+    display: inline-flex;
   }
 
   .category-grid {
@@ -1019,6 +1076,33 @@ textarea {
 
   .page-title-row {
     margin-top: 4px;
+  }
+
+  .editor-col {
+    display: none;
+  }
+
+  .editor-col.active {
+    display: block;
+  }
+
+  .editor-layout {
+    gap: 10px;
+  }
+
+  .layer-row {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar {
+    display: flex;
+    padding-bottom: 4px;
+  }
+
+  .editor-toolbar-top-actions .toolbar-action-undo,
+  .editor-toolbar-top-actions .toolbar-action-redo,
+  .editor-toolbar-top-actions .toolbar-action-render {
+    display: none;
   }
 }
 
