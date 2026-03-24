@@ -164,13 +164,7 @@ textarea {
 }
 
 .hero-section::before {
-  content: '';
-  position: absolute;
-  inset: -40px -12px -20px;
-  background: var(--glow-hero);
-  z-index: -1;
-  pointer-events: none;
-  animation: heroGlow 4s ease-in-out infinite;
+  content: none;
 }
 
 .hero-title {

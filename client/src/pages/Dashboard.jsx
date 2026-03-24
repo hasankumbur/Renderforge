@@ -4,79 +4,47 @@ import { api } from '../lib/api.js';
 
 const quickChips = ['Tum', 'Instagram', 'Facebook', 'TikTok', 'YouTube', 'Reklam'];
 
-const categoryDefinitions = [
-  {
-    name: 'Instagram Hikayesi',
+const categoryVisuals = {
+  instagram: {
     icon: 'instagram',
     gradient: 'linear-gradient(135deg, #f58529, #dd2a7b, #8134af)',
-    chip: 'Instagram',
-    terms: ['instagram', 'hikaye', 'story'],
   },
-  {
-    name: 'Instagram Gonderisi',
+  instagramPost: {
     icon: 'instagramSquare',
     gradient: 'linear-gradient(135deg, #dd2a7b, #8134af)',
-    chip: 'Instagram',
-    terms: ['instagram', 'post', 'gonderi'],
   },
-  {
-    name: 'Instagram Reels',
+  reels: {
     icon: 'reels',
     gradient: 'linear-gradient(135deg, #8134af, #dd2a7b, #f58529)',
-    chip: 'Instagram',
-    terms: ['instagram', 'reel', 'reels'],
   },
-  {
-    name: 'Facebook Gonderisi',
+  facebook: {
     icon: 'facebook',
     gradient: 'linear-gradient(135deg, #1877f2, #0a4fd6)',
-    chip: 'Facebook',
-    terms: ['facebook', 'meta', 'gonderi', 'post'],
   },
-  {
-    name: 'Facebook Reklami',
+  facebookAd: {
     icon: 'megaphone',
     gradient: 'linear-gradient(135deg, #0a4fd6, #42a5f5)',
-    chip: 'Reklam',
-    terms: ['facebook', 'meta', 'ad', 'reklam'],
   },
-  {
-    name: 'TikTok Videosu',
+  tiktok: {
     icon: 'tiktok',
     gradient: 'linear-gradient(135deg, #010101, #69c9d0, #ee1d52)',
-    chip: 'TikTok',
-    terms: ['tiktok', 'video'],
   },
-  {
-    name: 'YouTube Kisa',
+  shorts: {
     icon: 'shorts',
     gradient: 'linear-gradient(135deg, #ff0000, #cc0000)',
-    chip: 'YouTube',
-    terms: ['youtube', 'short', 'kisa'],
   },
-  {
-    name: 'YouTube Thumbnail',
+  youtube: {
     icon: 'youtube',
     gradient: 'linear-gradient(135deg, #ff0000, #ff6b6b)',
-    chip: 'YouTube',
-    terms: ['youtube', 'thumbnail', 'kapak'],
   },
-  {
-    name: 'Kampanya Seti',
+  generic: {
     icon: 'sparkle',
     gradient: 'linear-gradient(135deg, #7c3aed, #ec4899)',
-    chip: 'Reklam',
-    terms: ['kampanya', 'campaign', 'ad', 'reklam'],
   },
-];
+};
 
 function toSearchText(value) {
   return String(value || '').toLocaleLowerCase('tr-TR');
-}
-
-function isMatch(value, terms) {
-  const text = toSearchText(value);
-  return terms.some((term) => text.includes(term));
 }
 
 function detectPlatform(name) {
@@ -97,6 +65,35 @@ function detectPlatform(name) {
     return 'Reklam';
   }
   return 'Tum';
+}
+
+function detectCategoryVisual(name) {
+  const text = toSearchText(name);
+  if (text.includes('instagram') && (text.includes('reel') || text.includes('reels'))) {
+    return categoryVisuals.reels;
+  }
+  if (text.includes('instagram') && (text.includes('post') || text.includes('gonderi'))) {
+    return categoryVisuals.instagramPost;
+  }
+  if (text.includes('instagram')) {
+    return categoryVisuals.instagram;
+  }
+  if (text.includes('facebook') && (text.includes('reklam') || text.includes('ad'))) {
+    return categoryVisuals.facebookAd;
+  }
+  if (text.includes('facebook') || text.includes('meta')) {
+    return categoryVisuals.facebook;
+  }
+  if (text.includes('tiktok')) {
+    return categoryVisuals.tiktok;
+  }
+  if (text.includes('youtube') && (text.includes('short') || text.includes('kisa'))) {
+    return categoryVisuals.shorts;
+  }
+  if (text.includes('youtube')) {
+    return categoryVisuals.youtube;
+  }
+  return categoryVisuals.generic;
 }
 
 function templateBadge(name) {
@@ -289,24 +286,45 @@ export default function Dashboard() {
     [templates]
   );
 
-  const filteredTemplates = useMemo(() => {
+  const categoryRows = useMemo(() => {
+    const buckets = new Map();
+
+    templateRows.forEach((template) => {
+      const key = toSearchText(template.name || template.id).trim();
+      if (!buckets.has(key)) {
+        const visual = detectCategoryVisual(template.name);
+        buckets.set(key, {
+          key,
+          name: template.name || 'Adsiz kategori',
+          icon: visual.icon,
+          gradient: visual.gradient,
+          platform: detectPlatform(template.name),
+          count: 0,
+          templateId: template.id,
+          searchIndex: toSearchText(`${template.name || ''} ${detectPlatform(template.name)}`),
+        });
+      }
+
+      const current = buckets.get(key);
+      current.count += 1;
+    });
+
+    return Array.from(buckets.values()).sort(
+      (a, b) => b.count - a.count || a.name.localeCompare(b.name, 'tr')
+    );
+  }, [templateRows]);
+
+  const filteredCategories = useMemo(() => {
     const normalizedSearch = toSearchText(search.trim());
 
-    return templateRows.filter((item) => {
+    return categoryRows.filter((item) => {
       const chipOk = activeChip === 'Tum' ? true : item.platform === activeChip;
       const searchOk = normalizedSearch ? item.searchIndex.includes(normalizedSearch) : true;
       return chipOk && searchOk;
     });
-  }, [activeChip, search, templateRows]);
+  }, [activeChip, categoryRows, search]);
 
-  const categories = useMemo(
-    () =>
-      categoryDefinitions.map((item) => ({
-        ...item,
-        count: templateRows.filter((template) => isMatch(template.name, item.terms)).length,
-      })),
-    [templateRows]
-  );
+  const recentTemplates = useMemo(() => templateRows.slice(0, 10), [templateRows]);
 
   const doneRenderCount = useMemo(
     () => renders.filter((item) => item.status === 'done').length,
@@ -359,34 +377,44 @@ export default function Dashboard() {
       <div className="section-block section-reveal" style={{ '--delay': '160ms' }}>
         <h3 className="section-title">Ne olusturmak istersiniz?</h3>
         <div className="category-grid">
-          {categories.map((item) => (
+          {filteredCategories.map((item) => (
             <button
-              key={item.name}
+              key={item.key}
               type="button"
               className="category-item"
-              onClick={() => {
-                setActiveChip(item.chip);
-                setSearch('');
-              }}
+              onClick={() => navigate(`/app/editor/${item.templateId}`)}
             >
               <span className="category-icon" style={{ background: item.gradient }}>
                 <CategoryIcon type={item.icon} />
               </span>
               <span className="category-label">{item.name}</span>
-              <small className="category-meta">{item.count} template</small>
+              <small className="category-meta">{item.count} sablon</small>
             </button>
           ))}
         </div>
+        {!loading && filteredCategories.length === 0 && (
+          <div className="dashboard-empty-state panel">
+            <p>Filtreye uygun kategori bulunamadi.</p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button type="button" className="button" onClick={() => setActiveChip('Tum')}>
+                Filtreyi sifirla
+              </button>
+              <button type="button" className="button" onClick={() => setSearch('')}>
+                Aramayi temizle
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="section-block section-reveal" style={{ '--delay': '240ms' }}>
         <div className="section-header-row">
-          <h3 className="section-title">Sablonlari Kesfedin</h3>
+          <h3 className="section-title">Guncel sablonlar</h3>
           <Link to="/app/templates" className="section-link">Tumunu Gor</Link>
         </div>
 
         <div className="template-row" role="list">
-          {filteredTemplates.map((item) => (
+          {recentTemplates.map((item) => (
             <article key={item.id} className="template-card" role="listitem">
               <button
                 type="button"
@@ -407,13 +435,10 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {!loading && filteredTemplates.length === 0 && (
+        {!loading && recentTemplates.length === 0 && (
           <div className="dashboard-empty-state panel">
-            <p>Filtreye uygun template bulunamadi.</p>
+            <p>Henuz template bulunamadi.</p>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button type="button" className="button" onClick={() => setActiveChip('Tum')}>
-                Filtreyi sifirla
-              </button>
               <Link to="/app/editor" className="button primary">
                 Yeni template olustur
               </Link>

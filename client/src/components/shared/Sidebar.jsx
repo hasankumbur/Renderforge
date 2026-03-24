@@ -3,8 +3,9 @@ import { NavLink } from 'react-router-dom';
 function HomeIcon() {
   return (
     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.9">
-      <path d="M4 11.5L12 5l8 6.5" />
-      <path d="M6.5 10.8V19h11v-8.2" />
+      <path d="M5 19h14" />
+      <path d="M7 16l8-8 2 2-8 8-3 1z" />
+      <path d="M14.5 8.5l2 2" />
     </svg>
   );
 }
