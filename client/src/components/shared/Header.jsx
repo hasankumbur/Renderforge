@@ -1,3 +1,15 @@
+function CrownIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M4 18h16l-1.4-8-4.6 3-2-5-2 5-4.6-3z" />
+      <path d="M4 20h16" />
+      <circle cx="4" cy="8" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="12" cy="6" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="20" cy="8" r="1.2" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 export default function Header({ session, onToggleMenu }) {
   const initials = (session?.name || 'RF')
     .split(' ')
@@ -19,9 +31,7 @@ export default function Header({ session, onToggleMenu }) {
       <div className="header-center-spacer" />
 
       <button type="button" className="premium-button" aria-label="premium">
-        <span role="img" aria-hidden="true">
-          👑
-        </span>
+        <CrownIcon />
       </button>
     </header>
   );

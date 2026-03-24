@@ -61,10 +61,10 @@ textarea {
   position: sticky;
   top: 0;
   z-index: 50;
-  height: 64px;
-  padding: 0 var(--content-x);
+  min-height: 64px;
+  padding: max(8px, env(safe-area-inset-top)) var(--content-x) 8px;
   display: grid;
-  grid-template-columns: 40px 1fr 40px;
+  grid-template-columns: 44px 1fr 44px;
   align-items: center;
   background: transparent;
 }
@@ -79,6 +79,7 @@ textarea {
   border: 0;
   background: transparent;
   padding: 0;
+  overflow: visible;
 }
 
 .header-avatar {
@@ -189,6 +190,25 @@ textarea {
   color: var(--text-secondary);
 }
 
+.dashboard-kpi-row {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dashboard-kpi-row span {
+  height: 24px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(124, 58, 237, 0.35);
+  background: rgba(17, 24, 39, 0.65);
+  color: #c4b5fd;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+}
+
 .search-wrap {
   display: grid;
   gap: 10px;
@@ -247,6 +267,8 @@ textarea {
   color: var(--text-secondary);
   font-size: 13px;
   line-height: 32px;
+  cursor: pointer;
+  transition: all 150ms ease;
 }
 
 .filter-chip.active {
@@ -297,6 +319,7 @@ textarea {
   flex-direction: column;
   align-items: center;
   gap: 8px;
+  cursor: pointer;
   transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -322,6 +345,12 @@ textarea {
   line-height: 1.25;
 }
 
+.category-meta {
+  margin: -2px 0 0;
+  font-size: 11px;
+  color: #6b7280;
+}
+
 .template-row {
   display: flex;
   gap: 12px;
@@ -344,6 +373,18 @@ textarea {
 .template-card:active {
   transform: translateY(-2px);
   box-shadow: var(--shadow-hover);
+}
+
+.template-card-button {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .template-card-preview {
@@ -406,6 +447,15 @@ textarea {
 .template-card-footer small {
   font-size: 11px;
   color: #6b7280;
+}
+
+.dashboard-empty-state {
+  display: grid;
+  gap: 10px;
+}
+
+.dashboard-empty-state p {
+  margin: 0;
 }
 
 .page-title-row {
@@ -809,6 +859,12 @@ textarea {
   line-height: 1;
 }
 
+.mobile-bottom-link .icon svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
 .mobile-bottom-link.active {
   color: var(--accent-purple);
 }
@@ -833,6 +889,11 @@ textarea {
 
 .mobile-bottom-link.center .icon {
   font-size: 24px;
+}
+
+.mobile-bottom-link.center .icon svg {
+  width: 24px;
+  height: 24px;
 }
 
 .mobile-bottom-link.center span:last-child {
@@ -960,10 +1021,6 @@ textarea {
 
   .renders-mobile-cards {
     display: grid;
-  }
-
-  .header {
-    padding-top: max(8px, env(safe-area-inset-top));
   }
 
   .page-title-row {

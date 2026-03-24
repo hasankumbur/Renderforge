@@ -1,5 +1,52 @@
 import { NavLink } from 'react-router-dom';
 
+function HomeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.9">
+      <path d="M4 11.5L12 5l8 6.5" />
+      <path d="M6.5 10.8V19h11v-8.2" />
+    </svg>
+  );
+}
+
+function GridIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.9">
+      <rect x="4" y="4" width="7" height="7" rx="1.8" />
+      <rect x="13" y="4" width="7" height="7" rx="1.8" />
+      <rect x="4" y="13" width="7" height="7" rx="1.8" />
+      <rect x="13" y="13" width="7" height="7" rx="1.8" />
+    </svg>
+  );
+}
+
+function PlusIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2">
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </svg>
+  );
+}
+
+function PlayIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.9">
+      <rect x="4" y="4" width="16" height="16" rx="3" />
+      <polygon points="10,9 16,12 10,15" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function UserIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.9">
+      <circle cx="12" cy="8" r="3.5" />
+      <path d="M5 19c1.2-3.2 4-5 7-5s5.8 1.8 7 5" />
+    </svg>
+  );
+}
+
 const links = [
   { to: '/app/dashboard', label: 'Dashboard' },
   { to: '/app/templates', label: 'Templates' },
@@ -9,10 +56,10 @@ const links = [
 ];
 
 const mobileLinks = [
-  { to: '/app/templates', label: 'Şablonlar', icon: '▦' },
-  { to: '/app/editor', label: 'Editor', icon: '✦', center: true },
-  { to: '/app/renders', label: 'Renders', icon: '▶' },
-  { to: '/app/profile', label: 'Profil', icon: '☺' },
+  { to: '/app/templates', label: 'Sablonlar', icon: GridIcon },
+  { to: '/app/editor', label: 'Editor', icon: PlusIcon, center: true },
+  { to: '/app/renders', label: 'Renders', icon: PlayIcon },
+  { to: '/app/profile', label: 'Profil', icon: UserIcon },
 ];
 
 export default function Sidebar({ open, onClose }) {
@@ -44,7 +91,9 @@ export default function Sidebar({ open, onClose }) {
           }
           end
         >
-          <span className="icon">⌂</span>
+          <span className="icon">
+            <HomeIcon />
+          </span>
           <span>Oluştur</span>
         </NavLink>
 
@@ -64,7 +113,9 @@ export default function Sidebar({ open, onClose }) {
             }}
             end={item.to === '/app/dashboard'}
           >
-            <span className="icon">{item.center ? '+' : item.icon}</span>
+            <span className="icon">
+              <item.icon />
+            </span>
             <span>{item.label}</span>
           </NavLink>
         ))}
