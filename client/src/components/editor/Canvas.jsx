@@ -9,6 +9,42 @@ import {
 import { useEditorStore } from '../../store/editorStore.js';
 
 const GRID_SIZE = 10;
+const MIN_FIT_ZOOM = 0.12;
+const MAX_FIT_ZOOM = 1;
+
+function fitCanvasToStage(canvas, stage, template) {
+  if (!canvas || !stage) {
+    return;
+  }
+
+  const stageWidth = stage.clientWidth;
+  const stageHeight = stage.clientHeight;
+  const templateWidth = Math.max(1, Number(template.width || 1080));
+  const templateHeight = Math.max(1, Number(template.height || 1080));
+
+  if (!stageWidth || !stageHeight) {
+    return;
+  }
+
+  const horizontalPadding = 24;
+  const verticalPadding = 24;
+  const availableWidth = Math.max(60, stageWidth - horizontalPadding);
+  const availableHeight = Math.max(60, stageHeight - verticalPadding);
+
+  const fitZoom = Math.min(
+    MAX_FIT_ZOOM,
+    availableWidth / templateWidth,
+    availableHeight / templateHeight
+  );
+  const zoom = Math.max(MIN_FIT_ZOOM, fitZoom);
+  const scaledWidth = templateWidth * zoom;
+  const scaledHeight = templateHeight * zoom;
+  const offsetX = Math.max(0, (stageWidth - scaledWidth) / 2);
+  const offsetY = Math.max(0, (stageHeight - scaledHeight) / 2);
+
+  canvas.setViewportTransform([zoom, 0, 0, zoom, offsetX, offsetY]);
+  canvas.renderAll();
+}
 
 async function createObjectFromLayer(layer) {
   const common = {
@@ -231,6 +267,7 @@ export default function Canvas() {
       }
 
       canvas.renderAll();
+      fitCanvasToStage(canvas, stageRef.current, template);
       applyingRef.current = false;
     }
 
@@ -267,21 +304,17 @@ export default function Canvas() {
     const canvas = canvasRef.current;
     const stage = stageRef.current;
     if (!canvas || !stage) {
-      return;
+      return undefined;
     }
 
-    const stageWidth = stage.clientWidth;
-    if (!stageWidth) {
-      return;
-    }
+    const handleResize = () => {
+      fitCanvasToStage(canvas, stage, template);
+    };
 
-    const targetWidth = Number(template.width || 1080);
-    const fitZoom = Math.min(1, (stageWidth - 40) / targetWidth);
-
-    canvas.setZoom(Math.max(0.3, fitZoom));
-    canvas.absolutePan({ x: 0, y: 0 });
-    canvas.renderAll();
-  }, [template.width, template.height]);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [template.height, template.width]);
 
   return (
     <div ref={stageRef} className="panel canvas-stage">

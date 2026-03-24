@@ -7,6 +7,7 @@ export default function Templates() {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [deletingId, setDeletingId] = useState('');
 
   async function loadTemplates() {
     setLoading(true);
@@ -25,6 +26,24 @@ export default function Templates() {
   useEffect(() => {
     loadTemplates();
   }, []);
+
+  async function deleteTemplate(id) {
+    const confirmed = window.confirm('Bu template silinsin mi? Bu islem geri alinamaz.');
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingId(id);
+    setError('');
+    try {
+      await api.deleteTemplate(id);
+      setTemplates((prev) => prev.filter((item) => item.id !== id));
+    } catch (apiError) {
+      setError(apiError.message);
+    } finally {
+      setDeletingId('');
+    }
+  }
 
   return (
     <section className="page-stack">
@@ -48,10 +67,18 @@ export default function Templates() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               <Link className="button" to={`/app/editor/${template.id}`}>
                 Duzenle
               </Link>
+              <button
+                className="button"
+                type="button"
+                onClick={() => deleteTemplate(template.id)}
+                disabled={deletingId === template.id}
+              >
+                {deletingId === template.id ? 'Siliniyor...' : 'Sil'}
+              </button>
             </div>
           </article>
         ))}

@@ -693,6 +693,10 @@ textarea {
   gap: 10px;
 }
 
+.editor-page .canvas-stage {
+  min-height: calc(100vh - 420px);
+}
+
 .editor-floating-actions {
   position: fixed;
   right: 12px;
@@ -814,11 +818,6 @@ textarea {
 .fabric-canvas {
   border: 1px solid #374151;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
-}
-
-.toolbar-mobile-head {
-  display: block;
-  margin-bottom: 10px;
 }
 
 .toolbar {
@@ -1005,6 +1004,10 @@ textarea {
     min-height: calc(100vh - 220px);
   }
 
+  .editor-page .canvas-stage {
+    min-height: 560px;
+  }
+
   .editor-floating-actions {
     display: none;
   }
@@ -1084,10 +1087,15 @@ textarea {
 
   .editor-col.active {
     display: block;
+    min-height: 0;
   }
 
   .editor-layout {
     gap: 10px;
+  }
+
+  .editor-page .canvas-stage {
+    min-height: calc(100vh - 440px);
   }
 
   .layer-row {
