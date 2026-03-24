@@ -49,24 +49,53 @@ async function startServer() {
 
   app.use(express.static(clientDistDir));
 
-  app.use(async (req, res, next) => {
-    if (req.method !== 'GET' || req.path.startsWith('/api/')) {
-      return next();
-    }
-
-    try {
-      const indexPath = path.join(clientDistDir, 'index.html');
-      await fs.access(indexPath);
-      return res.sendFile(indexPath);
-    } catch (_error) {
-      return next();
-    }
+  app.use('/api', (_req, res) => {
+    return res.status(404).json({
+      success: false,
+      error: 'Kaynak bulunamadi',
+      code: 'NOT_FOUND',
+    });
   });
 
-  app.use((err, _req, res, _next) => {
-    return res.status(500).json({
+  app.use((req, res, next) => {
+    if (!['GET', 'HEAD'].includes(req.method) || req.path.startsWith('/api/')) {
+      return next();
+    }
+
+    const indexPath = path.join(clientDistDir, 'index.html');
+    return res.sendFile(indexPath, (error) => {
+      if (error) {
+        return next(error);
+      }
+      return undefined;
+    });
+  });
+
+  app.use((err, req, res, _next) => {
+    const statusCode = Number(err?.status || err?.statusCode || 500);
+
+    if (
+      statusCode === 404 &&
+      ['GET', 'HEAD'].includes(req.method) &&
+      !req.path.startsWith('/api/')
+    ) {
+      const indexPath = path.join(clientDistDir, 'index.html');
+      return res.sendFile(indexPath, (fallbackError) => {
+        if (fallbackError) {
+          return res.status(500).json({
+            success: false,
+            error: 'Sunucu hatasi',
+            detail:
+              fallbackError instanceof Error ? fallbackError.message : String(fallbackError),
+          });
+        }
+        return undefined;
+      });
+    }
+
+    return res.status(statusCode).json({
       success: false,
-      error: 'Sunucu hatasi',
+      error: statusCode >= 500 ? 'Sunucu hatasi' : 'Istek hatasi',
       detail: err instanceof Error ? err.message : String(err),
     });
   });
