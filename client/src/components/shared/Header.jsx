@@ -1,47 +1,28 @@
-import { useEffect, useState } from 'react';
-
-export default function Header({ session, onLogout, onToggleMenu }) {
-  const [apiKey, setApiKey] = useState('');
-
-  useEffect(() => {
-    const key = localStorage.getItem('renderforge_api_key') || '';
-    setApiKey(key);
-  }, []);
-
-  function handleChange(value) {
-    setApiKey(value);
-    localStorage.setItem('renderforge_api_key', value);
-  }
+export default function Header({ session, onToggleMenu }) {
+  const initials = (session?.name || 'RF')
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <header className="header">
-      <div className="header-left">
-        <button type="button" className="menu-button" onClick={onToggleMenu}>
-          ☰
-        </button>
-        <div className="brand">RenderForge Studio</div>
-      </div>
+      <button type="button" className="header-avatar-wrap" onClick={onToggleMenu}>
+        {session?.avatarUrl ? (
+          <img src={session.avatarUrl} alt="avatar" className="header-avatar" />
+        ) : (
+          <span className="header-avatar header-avatar-fallback">{initials}</span>
+        )}
+      </button>
 
-      <div className="header-right">
-        <input
-          className="api-key-input"
-          placeholder="rforge_dev_secret"
-          value={apiKey}
-          onChange={(event) => handleChange(event.target.value)}
-        />
+      <div className="header-center-spacer" />
 
-        <div className="user-chip">
-          <div className="user-avatar">{session?.name?.slice(0, 1) || 'U'}</div>
-          <div className="user-meta">
-            <strong>{session?.name || 'Kullanici'}</strong>
-            <small>{session?.email || 'user@renderforge.app'}</small>
-          </div>
-        </div>
-
-        <button type="button" className="button" onClick={onLogout}>
-          Cikis
-        </button>
-      </div>
+      <button type="button" className="premium-button" aria-label="premium">
+        <span role="img" aria-hidden="true">
+          👑
+        </span>
+      </button>
     </header>
   );
 }

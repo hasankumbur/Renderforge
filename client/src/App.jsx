@@ -34,14 +34,13 @@ function saveSession(session) {
   localStorage.setItem(SESSION_KEY, JSON.stringify(session));
 }
 
-function AppArea({ session, onLogout }) {
+function AppArea({ session }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <div className="app-shell">
       <Header
         session={session}
-        onLogout={onLogout}
         onToggleMenu={() => setMobileMenuOpen((prev) => !prev)}
       />
       <div className="app-content">
@@ -96,7 +95,7 @@ export default function App() {
         path="/app/*"
         element={
           session ? (
-            <AppArea session={session} onLogout={authApi.logout} />
+            <AppArea session={session} />
           ) : (
             <Navigate to="/login" replace />
           )
