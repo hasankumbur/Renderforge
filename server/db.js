@@ -469,6 +469,14 @@ const starterTemplates = [
 
 export function initDb() {
   db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
     CREATE TABLE IF NOT EXISTS templates (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
@@ -691,6 +699,29 @@ export function markProcessingRendersAsError(message) {
      WHERE status = 'processing'`
   );
   return stmt.run(message).changes;
+}
+
+export function createUser(user) {
+  const stmt = db.prepare(
+    `INSERT INTO users (id, name, email, password_hash)
+     VALUES (@id, @name, @email, @password_hash)`
+  );
+  stmt.run(user);
+  return getUserById(user.id);
+}
+
+export function getUserById(id) {
+  const stmt = db.prepare(
+    `SELECT id, name, email, password_hash, created_at FROM users WHERE id = ?`
+  );
+  return stmt.get(id);
+}
+
+export function getUserByEmail(email) {
+  const stmt = db.prepare(
+    `SELECT id, name, email, password_hash, created_at FROM users WHERE email = ?`
+  );
+  return stmt.get(email);
 }
 
 export { db };

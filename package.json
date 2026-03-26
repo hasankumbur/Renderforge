@@ -12,15 +12,16 @@
     "test": "node --test server/tests/*.test.mjs"
   },
   "dependencies": {
+    "@remotion/bundler": "latest",
+    "@remotion/renderer": "latest",
     "better-sqlite3": "latest",
     "cors": "latest",
     "dotenv": "latest",
     "express": "latest",
     "fabric": "latest",
+    "jsonwebtoken": "^9.0.3",
     "multer": "latest",
     "nanoid": "latest",
-    "@remotion/bundler": "latest",
-    "@remotion/renderer": "latest",
     "puppeteer": "latest",
     "react": "latest",
     "react-dom": "latest",
