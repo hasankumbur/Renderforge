@@ -8,13 +8,23 @@ export default function Login({ onLogin }) {
   });
   const [error, setError] = useState('');
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     setError('');
 
     if (!form.email || !form.password) {
-      setError('E-posta ve sifre zorunludur.');
+      setError('E-posta ve şifre zorunludur.');
       return;
+    }
+
+    try {
+      const res = await fetch('/api/config');
+      const data = await res.json();
+      if (data.apiKey) {
+        localStorage.setItem('renderforge_api_key', data.apiKey);
+      }
+    } catch (_err) {
+      // Config alınamazsa sessizce devam et
     }
 
     onLogin({
@@ -28,7 +38,7 @@ export default function Login({ onLogin }) {
     <div className="auth-page">
       <div className="auth-card panel">
         <h1>RenderForge</h1>
-        <p>Video ve gorsel otomasyon platformu</p>
+        <p>Video ve görsel otomasyon platformu</p>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <label className="field">
@@ -53,7 +63,7 @@ export default function Login({ onLogin }) {
           </label>
 
           <label className="field">
-            <span>Sifre</span>
+            <span>Şifre</span>
             <input
               type="password"
               value={form.password}
@@ -66,7 +76,7 @@ export default function Login({ onLogin }) {
           {error && <p className="error-text">{error}</p>}
 
           <button className="button primary auth-submit" type="submit">
-            Giris Yap
+            Giriş Yap
           </button>
         </form>
       </div>

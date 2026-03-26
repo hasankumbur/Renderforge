@@ -20,7 +20,7 @@ const editorPresets = {
     height: 1920,
   },
   'facebook-post': {
-    name: 'Facebook Gonderisi',
+    name: 'Facebook Gönderi',
     width: 1080,
     height: 1080,
   },
@@ -172,9 +172,9 @@ export default function Editor() {
         </button>
         <div className="editor-mobile-header-title-wrap">
           <strong className="editor-mobile-header-title">Editor</strong>
-          <small className="editor-mobile-header-subtitle">Mobil duzenleme</small>
+          <small className="editor-mobile-header-subtitle">Mobil düzenleme</small>
         </div>
-        <button type="button" className="editor-mobile-header-btn" aria-label="diger aksiyonlar">
+        <button type="button" className="editor-mobile-header-btn" aria-label="diğer aksiyonlar">
           <MoreIcon />
         </button>
       </header>
@@ -220,7 +220,7 @@ export default function Editor() {
             setMobileToolsOpen((prev) => !prev);
           }}
         >
-          Araclar
+          Araçlar
         </button>
       </div>
 

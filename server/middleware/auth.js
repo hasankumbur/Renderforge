@@ -5,7 +5,7 @@ export function requireApiKey(req, res, next) {
   if (!key || key !== expected) {
     return res.status(401).json({
       success: false,
-      error: 'Gecersiz API key',
+      error: 'Geçersiz API key',
       code: 'INVALID_API_KEY',
     });
   }

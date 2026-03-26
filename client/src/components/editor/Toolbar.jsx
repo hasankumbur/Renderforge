@@ -95,7 +95,7 @@ export default function Toolbar({ onOpenRender }) {
           onChange={(event) =>
             setTemplateMeta({ name: event.target.value }, { recordHistory: false })
           }
-          placeholder="Template adi"
+          placeholder="Template adı"
         />
         <div className="editor-toolbar-top-actions">
           <button
@@ -128,7 +128,7 @@ export default function Toolbar({ onOpenRender }) {
         </div>
       </div>
 
-      <div className="toolbar">
+      <div className="toolbar toolbar-actions">
         <input
           ref={uploadInputRef}
           type="file"
@@ -137,22 +137,27 @@ export default function Toolbar({ onOpenRender }) {
           onChange={handleAssetUpload}
         />
 
-        <button className="button" type="button" onClick={() => addLayer('text')}>
-          Text Ekle
+        <button className="button toolbar-icon-btn" type="button" onClick={() => addLayer('text')} title="Text Ekle">
+          <span className="toolbar-icon">✏️</span>
+          <span className="toolbar-btn-label">Text</span>
         </button>
-        <button className="button" type="button" onClick={() => addLayer('rect')}>
-          Dikdortgen Ekle
+        <button className="button toolbar-icon-btn" type="button" onClick={() => addLayer('rect')} title="Dikdörtgen Ekle">
+          <span className="toolbar-icon">⬜</span>
+          <span className="toolbar-btn-label">Dikdörtgen</span>
         </button>
-        <button className="button" type="button" onClick={() => addLayer('circle')}>
-          Daire Ekle
+        <button className="button toolbar-icon-btn" type="button" onClick={() => addLayer('circle')} title="Daire Ekle">
+          <span className="toolbar-icon">⭕</span>
+          <span className="toolbar-btn-label">Daire</span>
         </button>
         <button
-          className="button"
+          className="button toolbar-icon-btn"
           type="button"
           onClick={() => uploadInputRef.current?.click()}
           disabled={uploading}
+          title="Görsel Yükle"
         >
-          {uploading ? 'Upload...' : 'Gorsel Yukle'}
+          <span className="toolbar-icon">🖼️</span>
+          <span className="toolbar-btn-label">{uploading ? 'Yükleniyor...' : 'Görsel'}</span>
         </button>
 
         <select
@@ -177,7 +182,7 @@ export default function Toolbar({ onOpenRender }) {
               {size.label}
             </option>
           ))}
-          <option value="custom">Custom</option>
+          <option value="custom">Özel</option>
         </select>
 
         <input
@@ -217,6 +222,15 @@ export default function Toolbar({ onOpenRender }) {
             }
           />
         </label>
+
+        <button
+          className="button primary toolbar-render-btn"
+          type="button"
+          onClick={onOpenRender}
+          disabled={!template.id}
+        >
+          Render
+        </button>
       </div>
       {error && <p style={{ color: '#fca5a5', marginTop: 8 }}>{error}</p>}
     </div>

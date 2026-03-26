@@ -28,7 +28,7 @@ export default function Templates() {
   }, []);
 
   async function deleteTemplate(id) {
-    const confirmed = window.confirm('Bu template silinsin mi? Bu islem geri alinamaz.');
+    const confirmed = window.confirm('Bu template silinsin mi? Bu işlem geri alınamaz.');
     if (!confirmed) {
       return;
     }
@@ -54,7 +54,7 @@ export default function Templates() {
         </button>
       </div>
 
-      {loading && <p>Yukleniyor...</p>}
+      {loading && <p>Yükleniyor...</p>}
       {error && <p style={{ color: '#fca5a5' }}>{error}</p>}
 
       <div className="card-grid">
@@ -69,7 +69,7 @@ export default function Templates() {
 
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               <Link className="button" to={`/app/editor/${template.id}`}>
-                Duzenle
+                Düzenle
               </Link>
               <button
                 className="button"

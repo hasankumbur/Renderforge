@@ -18,7 +18,7 @@ export default function LayerPanel() {
   return (
     <aside className="panel">
       <h3>Layer Listesi</h3>
-      {layers.length === 0 && <p>Henuz layer yok.</p>}
+      {layers.length === 0 && <p>Henüz layer yok.</p>}
       {topFirstLayers.map((layer) => (
           <div
             key={layer.id}
@@ -83,7 +83,7 @@ export default function LayerPanel() {
                   updateLayer(layer.id, { hidden: !layer.hidden });
                 }}
               >
-                {layer.hidden ? 'Goster' : 'Gizle'}
+                {layer.hidden ? 'Göster' : 'Gizle'}
               </button>
               <button
                 className="button"

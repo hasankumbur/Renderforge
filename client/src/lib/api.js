@@ -20,7 +20,7 @@ async function request(path, options = {}) {
 
   const payload = await response.json().catch(() => ({}));
   if (!response.ok || payload.success === false) {
-    const error = new Error(payload.error || 'API istegi basarisiz oldu');
+    const error = new Error(payload.error || 'API isteği başarısız oldu');
     error.code = payload.code;
     throw error;
   }

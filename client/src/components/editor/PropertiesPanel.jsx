@@ -40,18 +40,18 @@ export default function PropertiesPanel() {
   if (!selectedLayer) {
     return (
       <aside className="panel">
-        <h3>Ozellikler</h3>
-        <p>Duzenlemek icin bir layer secin.</p>
+        <h3>Özellikler</h3>
+        <p>Düzenlemek için bir layer seçin.</p>
       </aside>
     );
   }
 
   return (
     <aside className="panel">
-      <h3>Ozellikler</h3>
+      <h3>Özellikler</h3>
 
       <label className="field">
-        <span>Layer adi</span>
+        <span>Layer adı</span>
         <input
           value={selectedLayer.name || ''}
           onChange={(event) =>
@@ -95,7 +95,7 @@ export default function PropertiesPanel() {
           </label>
 
           <label className="field">
-            <span>Font agirligi</span>
+            <span>Font ağırlığı</span>
             <select
               value={selectedLayer.fontWeight || 'normal'}
               onChange={(event) =>
@@ -153,7 +153,7 @@ export default function PropertiesPanel() {
       {selectedLayer.type === 'image' && (
         <>
           <label className="field">
-            <span>Gorsel URL</span>
+            <span>Görsel URL</span>
             <input
               value={selectedLayer.src || ''}
               onChange={(event) =>
@@ -163,7 +163,7 @@ export default function PropertiesPanel() {
           </label>
 
           <ToggleField
-            label="Orani koru"
+            label="Oranı koru"
             checked={Boolean(selectedLayer.keepRatio)}
             onChange={(event) =>
               updateLayer(selectedLayer.id, { keepRatio: event.target.checked })
@@ -186,7 +186,7 @@ export default function PropertiesPanel() {
           </label>
 
           <label className="field">
-            <span>Kenarlik rengi</span>
+            <span>Kenarlık rengi</span>
             <input
               type="color"
               value={selectedLayer.stroke || '#000000'}
@@ -197,7 +197,7 @@ export default function PropertiesPanel() {
           </label>
 
           <NumberField
-            label="Kenarlik kalinligi"
+            label="Kenarlık kalınlığı"
             value={selectedLayer.strokeWidth || 0}
             onChange={(value) => updateLayer(selectedLayer.id, { strokeWidth: value })}
           />
@@ -271,10 +271,10 @@ export default function PropertiesPanel() {
 
       <div style={{ display: 'flex', gap: 8 }}>
         <button className="button" type="button" onClick={() => bringForward(selectedLayer.id)}>
-          One getir
+          Öne getir
         </button>
         <button className="button" type="button" onClick={() => sendBackward(selectedLayer.id)}>
-          Arkaya gonder
+          Arkaya gönder
         </button>
       </div>
     </aside>
