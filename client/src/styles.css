@@ -721,8 +721,10 @@ textarea {
 
 .editor-layout {
   display: grid;
-  gap: 12px;
+  gap: 8px;
   grid-template-columns: 1fr;
+  flex: 1 1 0;
+  min-height: 0;
 }
 
 .editor-col {
@@ -730,8 +732,9 @@ textarea {
 }
 
 .editor-page {
-  display: grid;
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .editor-mobile-header {
@@ -770,7 +773,8 @@ textarea {
 }
 
 .editor-page .canvas-stage {
-  min-height: calc(100vh - 420px);
+  flex: 1 1 0;
+  min-height: 200px;
 }
 
 .editor-floating-actions {
@@ -802,13 +806,13 @@ textarea {
 
 .editor-toolbar {
   display: grid;
-  gap: 10px;
+  gap: 4px;
 }
 
 .editor-toolbar-top {
   display: grid;
-  gap: 8px;
-  padding: 10px;
+  gap: 6px;
+  padding: 8px;
 }
 
 .editor-toolbar-top-actions {
@@ -819,12 +823,12 @@ textarea {
 
 .editor-mobile-tabs {
   display: flex;
-  gap: 8px;
-  margin-bottom: 10px;
-  padding: 8px;
+  gap: 6px;
+  margin-bottom: 0;
+  padding: 6px;
   background: rgba(18, 18, 26, 0.85);
   border: 1px solid #25253a;
-  border-radius: 14px;
+  border-radius: 12px;
   overflow-x: auto;
 }
 
@@ -870,16 +874,19 @@ textarea {
 }
 
 .canvas-stage {
-  min-height: 360px;
+  min-height: 200px;
   background: linear-gradient(180deg, #0f1220 0%, #0b0d18 100%);
   border: 1px solid #2a2f46;
   border-radius: 16px;
   padding: 10px;
+  display: flex;
+  flex-direction: column;
 }
 
 .canvas-scroll {
   width: 100%;
-  height: 100%;
+  flex: 1 1 0;
+  min-height: 0;
   overflow: auto;
 }
 
@@ -921,10 +928,10 @@ textarea {
   display: flex;
   overflow-x: auto;
   flex-wrap: nowrap;
-  gap: 8px;
-  margin-bottom: 12px;
-  padding: 8px;
-  border-radius: 14px;
+  gap: 6px;
+  margin-bottom: 0;
+  padding: 6px;
+  border-radius: 12px;
   border: 1px solid #25253a;
   background: rgba(18, 18, 26, 0.9);
 }
@@ -1210,43 +1217,65 @@ textarea {
   }
 
   .page-container.editor-route {
-    padding: 0 0 calc(10px + env(safe-area-inset-bottom));
+    padding: 0;
+    height: 100dvh;
+    overflow: hidden;
   }
 
   .editor-page {
-    gap: 8px;
-    min-height: calc(100dvh - env(safe-area-inset-bottom));
-    grid-template-rows: auto auto auto 1fr;
+    gap: 4px;
+    height: calc(100dvh - env(safe-area-inset-bottom));
+    max-height: calc(100dvh - env(safe-area-inset-bottom));
+    overflow: hidden;
   }
 
   .editor-mobile-header {
-    position: sticky;
-    top: 0;
     z-index: 70;
     display: grid;
     grid-template-columns: 36px 1fr 36px;
     align-items: center;
-    gap: 10px;
-    padding: max(8px, env(safe-area-inset-top)) 14px 8px;
+    gap: 8px;
+    padding: max(4px, env(safe-area-inset-top)) 10px 4px;
     background: linear-gradient(90deg, #06b6d4, #7c3aed);
+    flex-shrink: 0;
   }
 
   .editor-toolbar {
-    gap: 8px;
-    padding: 0 10px;
+    gap: 4px;
+    padding: 0 8px;
+    flex-shrink: 0;
   }
 
   .editor-toolbar-top {
-    padding: 8px;
-    border-radius: 12px;
+    padding: 6px 8px;
+    border-radius: 10px;
+    gap: 4px;
   }
 
   .editor-toolbar-top-actions {
-    gap: 6px;
+    gap: 4px;
+  }
+
+  .editor-toolbar-top-actions .button {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  .toolbar-template-name {
+    padding: 6px 8px;
+    font-size: 13px;
   }
 
   .editor-mobile-tabs {
-    margin: 0 10px;
+    margin: 0 8px;
+    padding: 4px;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .editor-mobile-tabs .button {
+    padding: 6px 10px;
+    font-size: 12px;
   }
 
   .renders-desktop-wrap {
@@ -1266,20 +1295,26 @@ textarea {
   }
 
   .editor-col.active {
-    display: block;
+    display: flex;
+    flex-direction: column;
     min-height: 0;
+    flex: 1 1 0;
+    overflow: hidden;
   }
 
   .editor-layout {
-    gap: 8px;
+    gap: 4px;
     min-height: 0;
-    padding: 0 10px;
+    flex: 1 1 0;
+    padding: 0 8px;
+    overflow: hidden;
   }
 
   .editor-page .canvas-stage {
-    min-height: calc(100dvh - 320px - env(safe-area-inset-bottom));
-    border-radius: 12px;
-    padding: 8px;
+    flex: 1 1 0;
+    min-height: 0;
+    border-radius: 10px;
+    padding: 6px;
   }
 
   .layer-row {
@@ -1288,9 +1323,16 @@ textarea {
 
   .toolbar {
     display: flex;
-    padding-bottom: 4px;
+    padding: 4px;
     margin-bottom: 0;
-    border-radius: 12px;
+    border-radius: 10px;
+    gap: 4px;
+  }
+
+  .toolbar .button {
+    padding: 6px 8px;
+    font-size: 12px;
+    border-radius: 8px;
   }
 
   .editor-toolbar-top-actions .toolbar-action-undo,
@@ -1308,8 +1350,8 @@ textarea {
   }
 
   .editor-floating-actions {
-    right: 14px;
-    bottom: calc(14px + env(safe-area-inset-bottom));
+    right: 10px;
+    bottom: calc(10px + env(safe-area-inset-bottom));
   }
 }
 
