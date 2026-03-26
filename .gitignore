@@ -1,0 +1,13 @@
+node_modules
+client/dist
+outputs/*
+uploads/*
+!outputs/.gitkeep
+!uploads/.gitkeep
+server/renderforge.db
+server/renderforge.db-shm
+server/renderforge.db-wal
+.env
+.env.local
+.DS_Store
+*.log
