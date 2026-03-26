@@ -77,7 +77,7 @@ function ActionIcon({ type }) {
   );
 }
 
-export default function Profile({ session }) {
+export default function Profile({ session, onLogout }) {
   const [templateCount, setTemplateCount] = useState(null);
   const [totalRenders, setTotalRenders] = useState(null);
   const [successRate, setSuccessRate] = useState(null);
@@ -176,6 +176,12 @@ export default function Profile({ session }) {
             </Link>
           ))}
         </div>
+      </div>
+
+      <div className="profile-logout section-reveal" style={{ '--delay': '240ms' }}>
+        <button type="button" className="button logout-btn" onClick={onLogout}>
+          Çıkış Yap
+        </button>
       </div>
     </section>
   );
