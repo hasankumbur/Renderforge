@@ -2,6 +2,23 @@ import { useEffect, useRef, useState } from 'react';
 import { api } from '../../lib/api.js';
 import { useEditorStore } from '../../store/editorStore.js';
 
+function resolveAssetSrc(asset) {
+  if (asset?.path?.startsWith('/')) {
+    return asset.path;
+  }
+
+  if (asset?.url) {
+    try {
+      const parsed = new URL(asset.url, window.location.origin);
+      return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+    } catch {
+      return asset.url;
+    }
+  }
+
+  return '';
+}
+
 const canvasSizes = [
   { label: '1080x1080', width: 1080, height: 1080 },
   { label: '1920x1080', width: 1920, height: 1080 },
@@ -71,7 +88,7 @@ export default function Toolbar({ onOpenRender }) {
     try {
       const payload = await api.uploadAsset(file);
       addLayer('image', {
-        src: payload.data.url,
+        src: resolveAssetSrc(payload.data),
         width: 420,
         height: 240,
       });

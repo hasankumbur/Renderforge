@@ -81,6 +81,38 @@ function MoreIcon() {
   );
 }
 
+function AddIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </svg>
+  );
+}
+
+function LayersIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+      <path d="M4 8.5 12 4l8 4.5-8 4.5-8-4.5Z" />
+      <path d="m4 12.5 8 4.5 8-4.5" />
+      <path d="m4 16.5 8 4.5 8-4.5" />
+    </svg>
+  );
+}
+
+function PropertiesIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M4 7h9" />
+      <path d="M4 17h16" />
+      <path d="M11 12h9" />
+      <circle cx="15" cy="7" r="2" />
+      <circle cx="7" cy="12" r="2" />
+      <circle cx="13" cy="17" r="2" />
+    </svg>
+  );
+}
+
 export default function Editor() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
@@ -88,6 +120,7 @@ export default function Editor() {
   const resetTemplate = useEditorStore((state) => state.resetTemplate);
   const setTemplate = useEditorStore((state) => state.setTemplate);
   const templateId = useEditorStore((state) => state.template.id);
+  const selectedLayerId = useEditorStore((state) => state.selectedLayerId);
   const historyCount = useEditorStore((state) => state.history.length);
   const futureCount = useEditorStore((state) => state.future.length);
   const renderResult = useEditorStore((state) => state.renderResult);
@@ -96,8 +129,7 @@ export default function Editor() {
 
   const [error, setError] = useState('');
   const [showRenderModal, setShowRenderModal] = useState(false);
-  const [mobileEditorTab, setMobileEditorTab] = useState('canvas');
-  const [mobileToolsOpen, setMobileToolsOpen] = useState(false);
+  const [mobileSheet, setMobileSheet] = useState('none');
 
   useEffect(() => {
     if (!id) {
@@ -164,22 +196,52 @@ export default function Editor() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [redo, undo]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 430) {
+        setMobileSheet('none');
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const openMobileSheet = (name) => {
+    setMobileSheet((prev) => (prev === name ? 'none' : name));
+  };
+
+  const sheetTitle =
+    mobileSheet === 'layers'
+      ? 'Katmanlar'
+      : mobileSheet === 'properties'
+        ? 'Özellikler'
+        : 'Araçlar';
+
   return (
-    <section className="editor-page">
+    <section className={mobileSheet !== 'none' ? 'editor-page mobile-sheet-open' : 'editor-page'}>
       <header className="editor-mobile-header">
         <button type="button" className="editor-mobile-header-btn" onClick={() => window.history.back()}>
           <BackIcon />
         </button>
         <div className="editor-mobile-header-title-wrap">
-          <strong className="editor-mobile-header-title">Editor</strong>
-          <small className="editor-mobile-header-subtitle">Mobil düzenleme</small>
+          <strong className="editor-mobile-header-title">{id ? 'Template Düzenle' : 'Yeni Tasarım'}</strong>
+          <small className="editor-mobile-header-subtitle">Canva benzeri mobil çalışma alanı</small>
         </div>
-        <button type="button" className="editor-mobile-header-btn" aria-label="diğer aksiyonlar">
+        <button
+          type="button"
+          className="editor-mobile-header-btn"
+          aria-label="Araçları aç"
+          onClick={() => openMobileSheet('tools')}
+        >
           <MoreIcon />
         </button>
       </header>
 
-      <Toolbar onOpenRender={() => setShowRenderModal(true)} />
+      <div className="editor-toolbar-desktop">
+        <Toolbar onOpenRender={() => setShowRenderModal(true)} />
+      </div>
+
       {error && <p style={{ color: '#fca5a5' }}>{error}</p>}
 
       {renderResult?.url && (
@@ -191,53 +253,14 @@ export default function Editor() {
         </p>
       )}
 
-      <div className="editor-mobile-tabs panel">
-        <button
-          type="button"
-          className={mobileEditorTab === 'layers' ? 'button primary' : 'button'}
-          onClick={() => {
-            setMobileToolsOpen(false);
-            setMobileEditorTab('layers');
-          }}
-        >
-          Layers
-        </button>
-        <button
-          type="button"
-          className={mobileEditorTab === 'canvas' ? 'button primary' : 'button'}
-          onClick={() => {
-            setMobileToolsOpen(false);
-            setMobileEditorTab('canvas');
-          }}
-        >
-          Canvas
-        </button>
-        <button
-          type="button"
-          className={mobileToolsOpen ? 'button primary' : 'button'}
-          onClick={() => {
-            setMobileEditorTab('props');
-            setMobileToolsOpen((prev) => !prev);
-          }}
-        >
-          Araçlar
-        </button>
-      </div>
-
       <div className="editor-layout">
-        <div className={mobileEditorTab === 'layers' ? 'editor-col active' : 'editor-col'}>
+        <div className="editor-col editor-col-layers">
           <LayerPanel />
         </div>
-        <div className={mobileEditorTab === 'canvas' ? 'editor-col active' : 'editor-col'}>
+        <div className="editor-col editor-col-canvas">
           <Canvas />
         </div>
-        <div
-          className={
-            mobileToolsOpen || mobileEditorTab === 'props'
-              ? 'editor-col tools-drawer active'
-              : 'editor-col tools-drawer'
-          }
-        >
+        <div className="editor-col editor-col-properties">
           <PropertiesPanel />
         </div>
       </div>
@@ -271,6 +294,99 @@ export default function Editor() {
           <RenderIcon />
         </button>
       </div>
+
+      <div className="editor-mobile-dock" role="toolbar" aria-label="mobil editor aksiyonları">
+        <button
+          type="button"
+          className={mobileSheet === 'tools' ? 'editor-mobile-dock-btn active' : 'editor-mobile-dock-btn'}
+          onClick={() => openMobileSheet('tools')}
+        >
+          <AddIcon />
+          <span>Ekle</span>
+        </button>
+        <button
+          type="button"
+          className={mobileSheet === 'layers' ? 'editor-mobile-dock-btn active' : 'editor-mobile-dock-btn'}
+          onClick={() => openMobileSheet('layers')}
+        >
+          <LayersIcon />
+          <span>Katmanlar</span>
+        </button>
+        <button
+          type="button"
+          className={mobileSheet === 'properties' ? 'editor-mobile-dock-btn active' : 'editor-mobile-dock-btn'}
+          onClick={() => openMobileSheet('properties')}
+          disabled={!selectedLayerId}
+        >
+          <PropertiesIcon />
+          <span>Düzenle</span>
+        </button>
+        <button
+          type="button"
+          className="editor-mobile-dock-btn highlight"
+          onClick={() => setShowRenderModal(true)}
+          disabled={!templateId}
+        >
+          <RenderIcon />
+          <span>Render</span>
+        </button>
+      </div>
+
+      {mobileSheet !== 'none' && (
+        <button
+          type="button"
+          className="editor-mobile-sheet-backdrop"
+          onClick={() => setMobileSheet('none')}
+          aria-label="paneli kapat"
+        />
+      )}
+
+      <section
+        className={mobileSheet !== 'none' ? 'editor-mobile-sheet open' : 'editor-mobile-sheet'}
+        aria-hidden={mobileSheet === 'none'}
+      >
+        <button
+          type="button"
+          className="editor-mobile-sheet-handle"
+          onClick={() => setMobileSheet('none')}
+          aria-label="paneli kapat"
+        >
+          <span />
+        </button>
+
+        <div className="editor-mobile-sheet-tabs">
+          <button
+            type="button"
+            className={mobileSheet === 'tools' ? 'button primary' : 'button'}
+            onClick={() => setMobileSheet('tools')}
+          >
+            Araçlar
+          </button>
+          <button
+            type="button"
+            className={mobileSheet === 'layers' ? 'button primary' : 'button'}
+            onClick={() => setMobileSheet('layers')}
+          >
+            Katmanlar
+          </button>
+          <button
+            type="button"
+            className={mobileSheet === 'properties' ? 'button primary' : 'button'}
+            onClick={() => setMobileSheet('properties')}
+            disabled={!selectedLayerId}
+          >
+            Özellikler
+          </button>
+        </div>
+
+        <strong className="editor-mobile-sheet-title">{sheetTitle}</strong>
+
+        <div className="editor-mobile-sheet-body">
+          {mobileSheet === 'tools' && <Toolbar onOpenRender={() => setShowRenderModal(true)} />}
+          {mobileSheet === 'layers' && <LayerPanel />}
+          {mobileSheet === 'properties' && <PropertiesPanel />}
+        </div>
+      </section>
 
       {showRenderModal && <RenderModal onClose={() => setShowRenderModal(false)} />}
     </section>
