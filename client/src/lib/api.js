@@ -36,7 +36,9 @@ async function request(path, options = {}) {
 
   const payload = await response.json().catch(() => ({}));
 
-  if (response.status === 401) {
+  if (response.status === 401 && !path.startsWith('/api/auth/')) {
+    clearAuth();
+    window.location.href = '/login';
     const error = new Error(payload.error || 'Oturum süresi dolmuş.');
     error.code = payload.code || 'UNAUTHORIZED';
     error.status = 401;

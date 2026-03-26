@@ -45,10 +45,6 @@ async function startServer() {
     return res.json({ success: true, status: 'ok' });
   });
 
-  app.get('/api/config', (_req, res) => {
-    return res.json({ apiKey: process.env.API_KEY || 'rforge_dev_secret_change_me' });
-  });
-
   app.use('/api/auth', authRouter);
   app.use('/api/assets', assetsRouter);
   app.use('/api/templates', requireApiKey, templatesRouter);
