@@ -21,7 +21,7 @@ export default function RenderModal({ onClose }) {
 
   async function handleRender() {
     if (!template.id) {
-      setError('Render almadan once template kaydedilmeli.');
+      setError('Render almadan önce template kaydedilmeli.');
       return;
     }
 
@@ -58,7 +58,7 @@ export default function RenderModal({ onClose }) {
         <h3>Render Al</h3>
 
         <label className="field">
-          <span>Cikti tipi</span>
+          <span>Çıktı tipi</span>
           <select
             value={outputType}
             onChange={(event) => {
@@ -67,7 +67,7 @@ export default function RenderModal({ onClose }) {
               setFormat(nextType === 'video' ? 'mp4' : 'png');
             }}
           >
-            <option value="image">Gorsel</option>
+            <option value="image">Görsel</option>
             <option value="video">Video</option>
           </select>
         </label>
@@ -104,7 +104,7 @@ export default function RenderModal({ onClose }) {
             </label>
 
             <label className="field">
-              <span>Sure (saniye)</span>
+              <span>Süre (saniye)</span>
               <input
                 type="number"
                 min={1}
@@ -135,10 +135,10 @@ export default function RenderModal({ onClose }) {
 
         <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
           <button className="button" type="button" onClick={onClose}>
-            Vazgec
+            Vazgeç
           </button>
           <button className="button primary" type="button" onClick={handleRender} disabled={loading}>
-            {loading ? 'Isleniyor...' : 'Render Al'}
+            {loading ? 'İşleniyor...' : 'Render Al'}
           </button>
         </div>
       </div>

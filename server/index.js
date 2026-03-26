@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { initDb, markProcessingRendersAsError, seedStarterTemplates } from './db.js';
 import { requireApiKey } from './middleware/auth.js';
 import assetsRouter from './routes/assets.js';
+import authRouter from './routes/auth.js';
 import renderRouter from './routes/render.js';
 import templatesRouter from './routes/templates.js';
 
@@ -44,6 +45,7 @@ async function startServer() {
     return res.json({ success: true, status: 'ok' });
   });
 
+  app.use('/api/auth', authRouter);
   app.use('/api/assets', assetsRouter);
   app.use('/api/templates', requireApiKey, templatesRouter);
   app.use('/api/render', requireApiKey, renderRouter);

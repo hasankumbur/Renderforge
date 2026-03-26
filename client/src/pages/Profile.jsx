@@ -1,35 +1,6 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-
-const stats = [
-  {
-    label: 'Aylık Render',
-    value: '1,284',
-    delta: '+12%',
-    icon: 'render',
-    gradient: 'linear-gradient(135deg, #7c3aed, #06b6d4)',
-  },
-  {
-    label: 'Aktif Template',
-    value: '42',
-    delta: '+4%',
-    icon: 'layout',
-    gradient: 'linear-gradient(135deg, #2563eb, #7c3aed)',
-  },
-  {
-    label: 'Takım Üyesi',
-    value: '8',
-    delta: '+1',
-    icon: 'users',
-    gradient: 'linear-gradient(135deg, #06b6d4, #14b8a6)',
-  },
-  {
-    label: 'Başarılı İşlem',
-    value: '%99.2',
-    delta: '+0.3',
-    icon: 'check',
-    gradient: 'linear-gradient(135deg, #16a34a, #10b981)',
-  },
-];
+import { api } from '../lib/api.js';
 
 const actions = [
   {
@@ -70,17 +41,6 @@ function StatIcon({ type }) {
     );
   }
 
-  if (type === 'users') {
-    return (
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
-        <circle cx="8" cy="9" r="3" />
-        <circle cx="16" cy="10" r="2.5" />
-        <path d="M3 19c.8-2.8 3.2-4.2 5-4.2s4.2 1.4 5 4.2" />
-        <path d="M13 19c.5-1.8 2.2-2.8 3.5-2.8 1.2 0 2.6.7 3.2 2.1" />
-      </svg>
-    );
-  }
-
   return (
     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M20 7L10 17l-5-5" />
@@ -117,13 +77,70 @@ function ActionIcon({ type }) {
   );
 }
 
-export default function Profile({ session }) {
+export default function Profile({ session, onLogout }) {
+  const [templateCount, setTemplateCount] = useState(null);
+  const [totalRenders, setTotalRenders] = useState(null);
+  const [successRate, setSuccessRate] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadStats() {
+      const [tplResult, renderResult] = await Promise.allSettled([
+        api.getTemplates(),
+        api.getRenderHistory(),
+      ]);
+
+      if (!mounted) return;
+
+      if (tplResult.status === 'fulfilled') {
+        setTemplateCount((tplResult.value.data || []).length);
+      } else {
+        setTemplateCount(0);
+      }
+
+      if (renderResult.status === 'fulfilled') {
+        const renders = renderResult.value.data || [];
+        setTotalRenders(renders.length);
+        const doneCount = renders.filter((r) => r.status === 'done').length;
+        setSuccessRate(renders.length > 0 ? ((doneCount / renders.length) * 100).toFixed(1) : '0.0');
+      } else {
+        setTotalRenders(0);
+        setSuccessRate('0.0');
+      }
+    }
+
+    loadStats();
+    return () => { mounted = false; };
+  }, []);
+
   const initials = (session?.name || 'RF')
     .split(' ')
     .map((part) => part[0])
     .join('')
     .slice(0, 2)
     .toUpperCase();
+
+  const stats = [
+    {
+      label: 'Toplam Template',
+      value: templateCount !== null ? String(templateCount) : '--',
+      icon: 'layout',
+      gradient: 'linear-gradient(135deg, #2563eb, #7c3aed)',
+    },
+    {
+      label: 'Toplam Render',
+      value: totalRenders !== null ? String(totalRenders) : '--',
+      icon: 'render',
+      gradient: 'linear-gradient(135deg, #7c3aed, #06b6d4)',
+    },
+    {
+      label: 'Başarı Oranı',
+      value: successRate !== null ? `%${successRate}` : '--',
+      icon: 'check',
+      gradient: 'linear-gradient(135deg, #16a34a, #10b981)',
+    },
+  ];
 
   return (
     <section className="profile-shell">
@@ -143,7 +160,6 @@ export default function Profile({ session }) {
             </span>
             <div className="profile-stat-value-row">
               <strong>{item.value}</strong>
-              <span className="delta-pill">{item.delta}</span>
             </div>
             <small>{item.label}</small>
           </article>
@@ -160,6 +176,12 @@ export default function Profile({ session }) {
             </Link>
           ))}
         </div>
+      </div>
+
+      <div className="profile-logout section-reveal" style={{ '--delay': '240ms' }}>
+        <button type="button" className="button logout-btn" onClick={onLogout}>
+          Çıkış Yap
+        </button>
       </div>
     </section>
   );

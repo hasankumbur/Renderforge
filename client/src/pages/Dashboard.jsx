@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api.js';
 
-const quickChips = ['Tum', 'Instagram', 'Facebook', 'TikTok', 'YouTube', 'Reklam'];
+const quickChips = ['Tüm', 'Instagram', 'Facebook', 'TikTok', 'YouTube', 'Reklam'];
 
 const createOptionDefinitions = [
   {
@@ -27,7 +27,7 @@ const createOptionDefinitions = [
   },
   {
     key: 'facebook-post',
-    name: 'Facebook Gonderisi',
+    name: 'Facebook Gönderi',
     platform: 'Facebook',
     icon: 'facebook',
     gradient: 'linear-gradient(135deg, #1877f2, #0a4fd6)',
@@ -117,7 +117,7 @@ function detectPlatform(name) {
   if (text.includes('reklam') || text.includes('kampanya') || text.includes('ad')) {
     return 'Reklam';
   }
-  return 'Tum';
+  return 'Tüm';
 }
 
 function detectCategoryVisual(name) {
@@ -275,7 +275,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
-  const [activeChip, setActiveChip] = useState('Tum');
+  const [activeChip, setActiveChip] = useState('Tüm');
 
   useEffect(() => {
     let mounted = true;
@@ -307,7 +307,7 @@ export default function Dashboard() {
 
       const nextError = [templateResult, renderResult]
         .filter((item) => item.status === 'rejected')
-        .map((item) => item.reason?.message || 'Veri alinirken hata olustu')
+        .map((item) => item.reason?.message || 'Veri alınırken hata oluştu')
         .join(' | ');
 
       setError(nextError);
@@ -371,7 +371,7 @@ export default function Dashboard() {
         const visual = detectCategoryVisual(template.name);
         return {
           key: `template-${template.id}`,
-          name: template.name || 'Adsiz kategori',
+          name: template.name || 'Adsız kategori',
           icon: visual.icon,
           gradient: visual.gradient,
           platform: detectPlatform(template.name),
@@ -390,7 +390,7 @@ export default function Dashboard() {
     const normalizedSearch = toSearchText(search.trim());
 
     return categoryRows.filter((item) => {
-      const chipOk = activeChip === 'Tum' ? true : item.platform === activeChip;
+      const chipOk = activeChip === 'Tüm' ? true : item.platform === activeChip;
       const searchOk = normalizedSearch ? item.searchIndex.includes(normalizedSearch) : true;
       return chipOk && searchOk;
     });
@@ -413,13 +413,19 @@ export default function Dashboard() {
         <h2 className="hero-title">Bugün ne tasarlayacaksınız?</h2>
         <p className="hero-subtitle">
           {loading
-            ? 'Veriler yukleniyor...'
-            : `${templates.length} aktif template, ${doneRenderCount} tamamlanan render`}
+            ? 'Veriler yükleniyor...'
+            : templates.length === 0 && renders.length === 0
+              ? 'Başlamak için ilk şablonunuzu oluşturun'
+              : templates.length > 0 && renders.length === 0
+                ? `${templates.length} şablonunuz hazır, ilk renderi başlatın`
+                : `${templates.length} aktif şablon · ${doneRenderCount} tamamlanan render`}
         </p>
-        <div className="dashboard-kpi-row">
-          <span>{renders.length} toplam render</span>
-          <span>{processingRenderCount} islemde</span>
-        </div>
+        {renders.length > 0 && (
+          <div className="dashboard-kpi-row">
+            <span>{renders.length} toplam render</span>
+            <span>{processingRenderCount} işlemde</span>
+          </div>
+        )}
       </div>
 
       <div className="search-wrap section-reveal" style={{ '--delay': '80ms' }}>
@@ -428,26 +434,28 @@ export default function Dashboard() {
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Ne olusturmak istiyorsunuz?"
+            placeholder="Ne oluşturmak istiyorsunuz?"
           />
         </label>
 
-        <div className="filter-chip-row">
-          {quickChips.map((chip) => (
-            <button
-              key={chip}
-              type="button"
-              className={chip === activeChip ? 'filter-chip active' : 'filter-chip'}
-              onClick={() => setActiveChip(chip)}
-            >
-              {chip}
-            </button>
-          ))}
-        </div>
+        {templates.length > 0 && (
+          <div className="filter-chip-row">
+            {quickChips.map((chip) => (
+              <button
+                key={chip}
+                type="button"
+                className={chip === activeChip ? 'filter-chip active' : 'filter-chip'}
+                onClick={() => setActiveChip(chip)}
+              >
+                {chip}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="section-block section-reveal" style={{ '--delay': '160ms' }}>
-        <h3 className="section-title">Ne olusturmak istersiniz?</h3>
+        <h3 className="section-title">Ne oluşturmak istersiniz?</h3>
         <div className="category-grid">
           {filteredCategories.map((item) => (
             <button
@@ -476,60 +484,64 @@ export default function Dashboard() {
         </div>
         {!loading && filteredCategories.length === 0 && (
           <div className="dashboard-empty-state panel">
-            <p>Filtreye uygun kategori bulunamadi.</p>
+            <p>Filtreye uygun kategori bulunamadı.</p>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button type="button" className="button" onClick={() => setActiveChip('Tum')}>
-                Filtreyi sifirla
+              <button type="button" className="button" onClick={() => setActiveChip('Tüm')}>
+                Filtreyi sıfırla
               </button>
               <button type="button" className="button" onClick={() => setSearch('')}>
-                Aramayi temizle
+                Aramayı temizle
               </button>
             </div>
           </div>
         )}
       </div>
 
-      <div className="section-block section-reveal" style={{ '--delay': '240ms' }}>
-        <div className="section-header-row">
-          <h3 className="section-title">Guncel sablonlar</h3>
-          <Link to="/app/templates" className="section-link">Tumunu Gor</Link>
-        </div>
-
-        <div className="template-row" role="list">
-          {recentTemplates.map((item) => (
-            <article key={item.id} className="template-card" role="listitem">
-              <button
-                type="button"
-                className="template-card-button"
-                onClick={() => navigate(`/app/editor/${item.id}`)}
-              >
-                <div className="template-card-preview">
-                  <span className="template-badge">{item.badge}</span>
-                </div>
-                <div className="template-card-footer">
-                  <strong>{item.name}</strong>
-                  <small>
-                    {item.width}x{item.height} • {formatShortDate(item.updated_at)}
-                  </small>
-                </div>
-              </button>
-            </article>
-          ))}
-        </div>
-
-        {!loading && recentTemplates.length === 0 && (
-          <div className="dashboard-empty-state panel">
-            <p>Henuz template bulunamadi.</p>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <Link to="/app/editor" className="button primary">
-                Yeni template olustur
-              </Link>
-            </div>
+      {!loading && templates.length === 0 && (
+        <div className="section-block section-reveal" style={{ '--delay': '240ms' }}>
+          <div className="welcome-card">
+            <div className="welcome-icon">🚀</div>
+            <h3>RenderForge'a Hoş Geldiniz</h3>
+            <p>İlk şablonunuzu oluşturun ve otomatik içerik üretimine başlayın.</p>
+            <button className="button primary welcome-cta" type="button" onClick={() => navigate('/app/editor')}>
+              İlk Şablonumu Oluştur
+            </button>
           </div>
-        )}
+        </div>
+      )}
 
-        {error && <p className="error-text">{error}</p>}
-      </div>
+      {templates.length > 0 && (
+        <div className="section-block section-reveal" style={{ '--delay': '240ms' }}>
+          <div className="section-header-row">
+            <h3 className="section-title">Güncel şablonlar</h3>
+            <Link to="/app/templates" className="section-link">Tümünü Gör</Link>
+          </div>
+
+          <div className="template-row" role="list">
+            {recentTemplates.map((item) => (
+              <article key={item.id} className="template-card" role="listitem">
+                <button
+                  type="button"
+                  className="template-card-button"
+                  onClick={() => navigate(`/app/editor/${item.id}`)}
+                >
+                  <div className="template-card-preview">
+                    <span className="template-badge">{item.badge}</span>
+                  </div>
+                  <div className="template-card-footer">
+                    <strong>{item.name}</strong>
+                    <small>
+                      {item.width}x{item.height} • {formatShortDate(item.updated_at)}
+                    </small>
+                  </div>
+                </button>
+              </article>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {error && <p className="error-text">{error}</p>}
     </section>
   );
 }

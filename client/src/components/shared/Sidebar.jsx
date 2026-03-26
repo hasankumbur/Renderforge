@@ -57,8 +57,7 @@ const links = [
 ];
 
 const mobileLinks = [
-  { to: '/app/templates', label: 'Sablonlar', icon: GridIcon },
-  { to: '/app/editor', label: 'Editor', icon: EditIcon },
+  { to: '/app/templates', label: 'Şablonlar', icon: GridIcon },
   { to: '/app/renders', label: 'Renders', icon: PlayIcon },
   { to: '/app/profile', label: 'Profil', icon: UserIcon },
 ];

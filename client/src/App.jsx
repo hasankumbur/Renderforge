@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Header from './components/shared/Header.jsx';
 import Sidebar from './components/shared/Sidebar.jsx';
+import { api, clearAuth, getToken, setToken } from './lib/api.js';
 import Dashboard from './pages/Dashboard.jsx';
 import Editor from './pages/Editor.jsx';
 import Login from './pages/Login.jsx';
@@ -11,30 +12,18 @@ import Templates from './pages/Templates.jsx';
 
 const SESSION_KEY = 'renderforge_session';
 
-function getInitialSession() {
+function getStoredSession() {
   const raw = localStorage.getItem(SESSION_KEY);
-  if (!raw) {
-    return null;
-  }
-
+  if (!raw) return null;
   try {
     return JSON.parse(raw);
-  } catch (_error) {
+  } catch (_e) {
     localStorage.removeItem(SESSION_KEY);
     return null;
   }
 }
 
-function saveSession(session) {
-  if (!session) {
-    localStorage.removeItem(SESSION_KEY);
-    return;
-  }
-
-  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-}
-
-function AppArea({ session }) {
+function AppArea({ session, onLogout }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const isEditorRoute = location.pathname.startsWith('/app/editor');
@@ -64,7 +53,7 @@ function AppArea({ session }) {
             <Route path="editor" element={<Editor />} />
             <Route path="editor/:id" element={<Editor />} />
             <Route path="renders" element={<Renders />} />
-            <Route path="profile" element={<Profile session={session} />} />
+            <Route path="profile" element={<Profile session={session} onLogout={onLogout} />} />
             <Route path="*" element={<Navigate to="dashboard" replace />} />
           </Routes>
         </main>
@@ -74,21 +63,49 @@ function AppArea({ session }) {
 }
 
 export default function App() {
-  const [session, setSession] = useState(getInitialSession);
+  const [session, setSession] = useState(getStoredSession);
+  const [checking, setChecking] = useState(!!getToken());
 
-  const authApi = useMemo(
-    () => ({
-      login(nextSession) {
-        saveSession(nextSession);
-        setSession(nextSession);
-      },
-      logout() {
-        saveSession(null);
+  useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      setChecking(false);
+      setSession(null);
+      return;
+    }
+
+    api.getMe()
+      .then((res) => {
+        const user = res.data;
+        localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+        setSession(user);
+      })
+      .catch(() => {
+        clearAuth();
         setSession(null);
-      },
-    }),
-    []
-  );
+      })
+      .finally(() => setChecking(false));
+  }, []);
+
+  const handleLogin = useCallback((user) => {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    setSession(user);
+  }, []);
+
+  const handleLogout = useCallback(() => {
+    api.logout().finally(() => {
+      clearAuth();
+      setSession(null);
+    });
+  }, []);
+
+  if (checking) {
+    return (
+      <div className="auth-page">
+        <p style={{ color: 'var(--text-secondary)' }}>Oturum kontrol ediliyor...</p>
+      </div>
+    );
+  }
 
   return (
     <Routes>
@@ -98,7 +115,7 @@ export default function App() {
           session ? (
             <Navigate to="/app/dashboard" replace />
           ) : (
-            <Login onLogin={authApi.login} />
+            <Login onLogin={handleLogin} />
           )
         }
       />
@@ -107,7 +124,7 @@ export default function App() {
         path="/app/*"
         element={
           session ? (
-            <AppArea session={session} />
+            <AppArea session={session} onLogout={handleLogout} />
           ) : (
             <Navigate to="/login" replace />
           )

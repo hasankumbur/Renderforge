@@ -16,8 +16,8 @@ export default function Renders() {
 
   return (
     <section className="page-stack">
-      <h2>Render Gecmisi</h2>
-      {loading && <p>Yukleniyor...</p>}
+      <h2>Render Geçmişi</h2>
+      {loading && <p>Yükleniyor...</p>}
       {error && <p style={{ color: '#fca5a5' }}>{error}</p>}
 
       <div className="panel renders-desktop-wrap">
@@ -30,7 +30,7 @@ export default function Renders() {
                 <th align="left">Tip</th>
                 <th align="left">Durum</th>
                 <th align="left">Tarih</th>
-                <th align="left">Cikti</th>
+                <th align="left">Çıktı</th>
               </tr>
             </thead>
             <tbody>
@@ -44,7 +44,7 @@ export default function Renders() {
                   <td>
                     {row.output_url ? (
                       <a href={row.output_url} target="_blank" rel="noreferrer">
-                        Indir
+                        İndir
                       </a>
                     ) : (
                       '-'
@@ -66,10 +66,10 @@ export default function Renders() {
             <div className="render-card-row"><strong>Durum</strong><span>{row.status}</span></div>
             <div className="render-card-row"><strong>Tarih</strong><span>{row.created_at}</span></div>
             <div className="render-card-row">
-              <strong>Cikti</strong>
+              <strong>Çıktı</strong>
               {row.output_url ? (
                 <a href={row.output_url} target="_blank" rel="noreferrer">
-                  Indir
+                  İndir
                 </a>
               ) : (
                 <span>-</span>

@@ -330,6 +330,12 @@ export default function Canvas() {
           }}
         >
           <canvas ref={canvasElementRef} className="fabric-canvas" />
+          {template.layers.length === 0 && (
+            <div className="canvas-empty-hint">
+              <span>✚</span>
+              <p>Üstteki araç çubuğundan<br/>eleman ekleyin</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
