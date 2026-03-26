@@ -683,10 +683,41 @@ textarea {
   color: var(--text-secondary);
 }
 
-.auth-form {
+.auth-tabs {
+  display: flex;
+  gap: 0;
   margin-top: 16px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #2d2d44;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 10px 0;
+  border: 0;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.auth-tab.active {
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+  color: #fff;
+}
+
+.auth-form {
+  margin-top: 12px;
   display: grid;
   gap: 10px;
+}
+
+.auth-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .field {
