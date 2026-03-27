@@ -19,11 +19,112 @@ function resolveAssetSrc(asset) {
   return '';
 }
 
+function readImageSize(file) {
+  return new Promise((resolve) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new Image();
+
+    image.onload = () => {
+      resolve({
+        width: image.naturalWidth || image.width || 1,
+        height: image.naturalHeight || image.height || 1,
+      });
+      URL.revokeObjectURL(objectUrl);
+    };
+
+    image.onerror = () => {
+      resolve({ width: 1, height: 1 });
+      URL.revokeObjectURL(objectUrl);
+    };
+
+    image.src = objectUrl;
+  });
+}
+
 const canvasSizes = [
   { label: '1080x1080', width: 1080, height: 1080 },
   { label: '1920x1080', width: 1920, height: 1080 },
   { label: '1080x1920', width: 1080, height: 1920 },
   { label: '1280x720', width: 1280, height: 720 },
+];
+
+function TextIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5 6h14" />
+      <path d="M12 6v12" />
+      <path d="M8.5 18h7" />
+    </svg>
+  );
+}
+
+function RectangleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="4.5" y="6" width="15" height="12" rx="2.5" />
+    </svg>
+  );
+}
+
+function CircleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="7" />
+    </svg>
+  );
+}
+
+function ImageIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="4" y="5" width="16" height="14" rx="3" />
+      <circle cx="9" cy="10" r="1.2" fill="currentColor" stroke="none" />
+      <path d="m8 16 3.2-3 2.5 2.2 2.3-2.2L19 16" />
+    </svg>
+  );
+}
+
+function UndoIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9 8H5v4" />
+      <path d="M5 12c1.8-3 4.4-4.5 7.8-4.5A7.2 7.2 0 0 1 20 14.7" />
+    </svg>
+  );
+}
+
+function RedoIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M15 8h4v4" />
+      <path d="M19 12c-1.8-3-4.4-4.5-7.8-4.5A7.2 7.2 0 0 0 4 14.7" />
+    </svg>
+  );
+}
+
+function RenderIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="4" y="5" width="16" height="14" rx="3" />
+      <polygon points="10,9 16,12 10,15" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function CoverIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="5" y="5" width="14" height="14" rx="2" />
+      <path d="M5 9h14" opacity="0.95" />
+      <path d="m8 15 2.6-2.5 2.2 2 2.2-2.1L19 16" />
+    </svg>
+  );
+}
+
+const layerQuickAddActions = [
+  { type: 'text', title: 'Text Ekle', label: 'Text', Icon: TextIcon },
+  { type: 'rect', title: 'Dikdörtgen Ekle', label: 'Dikdörtgen', Icon: RectangleIcon },
+  { type: 'circle', title: 'Daire Ekle', label: 'Daire', Icon: CircleIcon },
 ];
 
 export default function Toolbar({ onOpenRender }) {
@@ -33,6 +134,11 @@ export default function Toolbar({ onOpenRender }) {
   const setTemplate = useEditorStore((state) => state.setTemplate);
   const undo = useEditorStore((state) => state.undo);
   const redo = useEditorStore((state) => state.redo);
+  const selectedLayerId = useEditorStore((state) => state.selectedLayerId);
+  const selectedLayer = useEditorStore((state) =>
+    state.template.layers.find((layer) => layer.id === state.selectedLayerId)
+  );
+  const makeImageBackground = useEditorStore((state) => state.makeImageBackground);
   const historyCount = useEditorStore((state) => state.history.length);
   const futureCount = useEditorStore((state) => state.future.length);
 
@@ -86,11 +192,23 @@ export default function Toolbar({ onOpenRender }) {
     setUploading(true);
     setError('');
     try {
-      const payload = await api.uploadAsset(file);
+      const [{ width: imageWidth, height: imageHeight }, payload] = await Promise.all([
+        readImageSize(file),
+        api.uploadAsset(file),
+      ]);
+
+      const maxWidth = Math.max(220, Math.round(template.width * 0.9));
+      const maxHeight = Math.max(220, Math.round(template.height * 0.72));
+      const scale = Math.min(maxWidth / imageWidth, maxHeight / imageHeight, 1);
+      const width = Math.max(120, Math.round(imageWidth * scale));
+      const height = Math.max(120, Math.round(imageHeight * scale));
+
       addLayer('image', {
         src: resolveAssetSrc(payload.data),
-        width: 420,
-        height: 240,
+        width,
+        height,
+        x: Math.max(0, Math.round((template.width - width) / 2)),
+        y: Math.max(0, Math.round((template.height - height) / 2)),
       });
     } catch (apiError) {
       setError(apiError.message);
@@ -116,31 +234,34 @@ export default function Toolbar({ onOpenRender }) {
         />
         <div className="editor-toolbar-top-actions">
           <button
-            className="button toolbar-action-undo"
+            className="button toolbar-action-undo toolbar-top-btn"
             type="button"
             onClick={undo}
             disabled={!historyCount}
           >
-            Undo
+            <span className="toolbar-inline-icon"><UndoIcon /></span>
+            <span>Undo</span>
           </button>
           <button
-            className="button toolbar-action-redo"
+            className="button toolbar-action-redo toolbar-top-btn"
             type="button"
             onClick={redo}
             disabled={!futureCount}
           >
-            Redo
+            <span className="toolbar-inline-icon"><RedoIcon /></span>
+            <span>Redo</span>
           </button>
-          <button className="button primary" type="button" onClick={saveTemplate} disabled={saving}>
+          <button className="button primary toolbar-top-btn" type="button" onClick={saveTemplate} disabled={saving}>
             {saving ? 'Kaydediliyor...' : 'Kaydet'}
           </button>
           <button
-            className="button toolbar-action-render"
+            className="button toolbar-action-render toolbar-top-btn toolbar-render-inline"
             type="button"
             onClick={onOpenRender}
             disabled={!template.id}
           >
-            Render
+            <span className="toolbar-inline-icon"><RenderIcon /></span>
+            <span>Render</span>
           </button>
         </div>
       </div>
@@ -154,18 +275,18 @@ export default function Toolbar({ onOpenRender }) {
           onChange={handleAssetUpload}
         />
 
-        <button className="button toolbar-icon-btn" type="button" onClick={() => addLayer('text')} title="Text Ekle">
-          <span className="toolbar-icon">✏️</span>
-          <span className="toolbar-btn-label">Text</span>
-        </button>
-        <button className="button toolbar-icon-btn" type="button" onClick={() => addLayer('rect')} title="Dikdörtgen Ekle">
-          <span className="toolbar-icon">⬜</span>
-          <span className="toolbar-btn-label">Dikdörtgen</span>
-        </button>
-        <button className="button toolbar-icon-btn" type="button" onClick={() => addLayer('circle')} title="Daire Ekle">
-          <span className="toolbar-icon">⭕</span>
-          <span className="toolbar-btn-label">Daire</span>
-        </button>
+        {layerQuickAddActions.map(({ type, title, label, Icon }) => (
+          <button
+            key={type}
+            className="button toolbar-icon-btn"
+            type="button"
+            onClick={() => addLayer(type)}
+            title={title}
+          >
+            <span className="toolbar-icon"><Icon /></span>
+            <span className="toolbar-btn-label">{label}</span>
+          </button>
+        ))}
         <button
           className="button toolbar-icon-btn"
           type="button"
@@ -173,7 +294,7 @@ export default function Toolbar({ onOpenRender }) {
           disabled={uploading}
           title="Görsel Yükle"
         >
-          <span className="toolbar-icon">🖼️</span>
+          <span className="toolbar-icon"><ImageIcon /></span>
           <span className="toolbar-btn-label">{uploading ? 'Yükleniyor...' : 'Görsel'}</span>
         </button>
 
@@ -240,13 +361,26 @@ export default function Toolbar({ onOpenRender }) {
           />
         </label>
 
+        {selectedLayer?.type === 'image' && (
+          <button
+            className="button toolbar-bg-btn"
+            type="button"
+            onClick={() => makeImageBackground(selectedLayerId)}
+            disabled={!selectedLayerId}
+          >
+            <span className="toolbar-inline-icon"><CoverIcon /></span>
+            <span>Arka plan yap</span>
+          </button>
+        )}
+
         <button
           className="button primary toolbar-render-btn"
           type="button"
           onClick={onOpenRender}
           disabled={!template.id}
         >
-          Render
+          <span className="toolbar-inline-icon"><RenderIcon /></span>
+          <span>Render</span>
         </button>
       </div>
       {error && <p style={{ color: '#fca5a5', marginTop: 8 }}>{error}</p>}

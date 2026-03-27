@@ -273,6 +273,92 @@ export const useEditorStore = create((set, get) => ({
     });
   },
 
+  bringToFront(layerId) {
+    set((state) => {
+      const layers = [...state.template.layers].sort(
+        (a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0)
+      );
+      const index = layers.findIndex((layer) => layer.id === layerId);
+      if (index < 0 || index === layers.length - 1) {
+        return {};
+      }
+
+      const [layer] = layers.splice(index, 1);
+      layers.push(layer);
+
+      return commitTemplateChange(
+        state,
+        {
+          ...state.template,
+          layers: normalizeLayerOrder(layers),
+        },
+        true
+      );
+    });
+  },
+
+  sendToBack(layerId) {
+    set((state) => {
+      const layers = [...state.template.layers].sort(
+        (a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0)
+      );
+      const index = layers.findIndex((layer) => layer.id === layerId);
+      if (index <= 0) {
+        return {};
+      }
+
+      const [layer] = layers.splice(index, 1);
+      layers.unshift(layer);
+
+      return commitTemplateChange(
+        state,
+        {
+          ...state.template,
+          layers: normalizeLayerOrder(layers),
+        },
+        true
+      );
+    });
+  },
+
+  makeImageBackground(layerId) {
+    set((state) => {
+      const target = state.template.layers.find(
+        (layer) => layer.id === layerId && layer.type === 'image'
+      );
+      if (!target) {
+        return {};
+      }
+
+      const templateWidth = Math.max(1, Number(state.template.width || 1080));
+      const templateHeight = Math.max(1, Number(state.template.height || 1080));
+
+      const updated = state.template.layers.map((layer) => {
+        if (layer.id !== layerId) {
+          return layer;
+        }
+
+        return {
+          ...layer,
+          x: 0,
+          y: 0,
+          width: templateWidth,
+          height: templateHeight,
+          zIndex: -1,
+        };
+      });
+
+      return commitTemplateChange(
+        state,
+        {
+          ...state.template,
+          layers: normalizeLayerOrder(updated),
+        },
+        true
+      );
+    });
+  },
+
   setRenderResult(result) {
     set({ renderResult: result });
   },
